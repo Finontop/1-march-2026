@@ -3446,11 +3446,20 @@ async function modalFetchGST() {
     const data = await res.json();
     if (!data.success) throw new Error(data.error || 'Lookup failed');
 
+    // Check if the API returned actual business data or just a fallback
+    const hasRealData = !data.fallback && (data.trade_name || data.legal_name || data.address);
+
     // Pre-fill registration form with GST data
     if (data.legal_name) document.getElementById('srName').value = data.legal_name;
     if (data.city) document.getElementById('srCity').value = data.city;
-    status.className = 'gst-modal-status success';
-    status.textContent = '✓ GST verified! Proceeding to registration…';
+
+    if (hasRealData) {
+      status.className = 'gst-modal-status success';
+      status.textContent = '✓ GST verified! Proceeding to registration…';
+    } else {
+      status.className = 'gst-modal-status error';
+      status.textContent = 'Could not fetch details — proceeding to manual entry.';
+    }
     setTimeout(() => { _sellerGSTDone = true; _renderModal(); }, 800);
 
   } catch(err) {
