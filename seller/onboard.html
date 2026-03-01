@@ -1254,7 +1254,7 @@ function prefillForm(s, d) {
 
 // ── Load from DB ─────────────────────────────────────────────
 // Safety: remove overlay after 6s even if fetch hangs
-const _overlayTimer = setTimeout(() => {
+const overlayTimer = setTimeout(() => {
   const overlay = document.getElementById('loadOverlay');
   if (overlay && !overlay.classList.contains('hide')) {
     console.warn('Overlay timeout — removing loading screen');
@@ -1291,7 +1291,7 @@ async function loadFromDB() {
     prefillForm(seller, details || {});
     toast('Could not load latest data from server.', 3000);
   } finally {
-    clearTimeout(_overlayTimer);
+    clearTimeout(overlayTimer);
     const overlay = document.getElementById('loadOverlay');
     overlay.classList.add('hide');
     setTimeout(() => overlay.style.display = 'none', 400);
