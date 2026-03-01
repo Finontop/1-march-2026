@@ -1090,13 +1090,14 @@ async function safeGSTFetch(url, options = {}) {
   const text = await res.text();
   let data;
   try { data = JSON.parse(text); }
-  catch {
+  catch (parseErr) {
     let hint = '';
     if (res.status === 500) hint = 'Server error. Check PHP logs.';
     else if (res.status === 502 || res.status === 504) hint = 'Server timeout — try again.';
     else if (text.includes('Fatal error') || text.includes('Parse error')) hint = 'PHP error on server.';
     else if (text.includes('<!DOCTYPE') || text.includes('<html')) hint = 'Server returned HTML instead of JSON.';
     else hint = text.substring(0, 200) || 'Empty response from server.';
+    console.error('safeGSTFetch parse error:', parseErr.message, 'status:', res.status, 'body:', text.substring(0, 300));
     return { ok: false, error: hint, status: res.status };
   }
   if (data && data.success === false) {
