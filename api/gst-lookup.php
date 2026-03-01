@@ -51,7 +51,6 @@ try {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT        => 8,
         CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_HTTPHEADER     => ["Accept: application/json"],
     ]);
     $response = curl_exec($ch);
@@ -77,7 +76,6 @@ if (!$result) {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 8,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_HTTPHEADER     => [
                 "Accept: application/json",
                 "Content-Type: application/json",
