@@ -41,33 +41,61 @@ $gstStates = [
 $stateCode = substr($gstin, 0, 2);
 $stateName = $gstStates[$stateCode] ?? '';
 
-// Try fetching from public GST API
-$apiUrl = "https://sheet.best/api/sheets/1599c0e3-3b7c-4c05-940a-082adea327d6/GSTIN/" . urlencode($gstin);
+// ── Primary: Official GST Portal API (services.gst.gov.in) ─────
 $result = null;
 
 try {
-    $ch = curl_init($apiUrl);
+    $govUrl = "https://services.gst.gov.in/services/api/search/taxpayerByGstin/" . urlencode($gstin);
+    $ch = curl_init($govUrl);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 8,
+        CURLOPT_TIMEOUT        => 10,
         CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTPHEADER     => ["Accept: application/json"],
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_HTTPHEADER     => [
+            "Accept: application/json",
+            "Content-Type: application/json",
+        ],
+        CURLOPT_USERAGENT      => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     ]);
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($httpCode === 200 && $response) {
-        $data = json_decode($response, true);
-        if (is_array($data) && count($data) > 0) {
-            $result = $data[0];
+        $d = json_decode($response, true);
+        if (!empty($d) && !empty($d["gstin"])) {
+            // Build full address from addr sub-fields
+            $addr = $d["pradr"]["addr"] ?? [];
+            $addrParts = array_filter([
+                $addr["bno"] ?? "",   // building number
+                $addr["bnm"] ?? "",   // building name
+                $addr["flno"] ?? "",  // floor number
+                $addr["st"] ?? "",    // street
+                $addr["loc"] ?? "",   // locality
+            ]);
+            $fullAddress = !empty($d["pradr"]["adr"])
+                ? $d["pradr"]["adr"]
+                : implode(", ", $addrParts);
+
+            $result = [
+                "trade_name"    => $d["tradeNam"] ?? "",
+                "legal_name"    => $d["lgnm"] ?? "",
+                "address"       => $fullAddress,
+                "state"         => $addr["stcd"] ?? $stateName,
+                "pincode"       => $addr["pncd"] ?? "",
+                "city"          => $addr["dst"] ?? $addr["loc"] ?? "",
+                "business_type" => $d["ctb"] ?? "",
+                "status"        => $d["sts"] ?? "",
+                "nature"        => $d["pradr"]["ntr"] ?? "",
+            ];
         }
     }
 } catch (Throwable $e) {
     // Silently fall through to fallback
 }
 
-// If external API didn't return results, try a second public source
+// ── Secondary: Masters India public API (fallback) ─────────────
 if (!$result) {
     try {
         $altUrl = "https://commonapi.mastersindia.co/commonapis/searchgstin?gstin=" . urlencode($gstin);
@@ -76,10 +104,12 @@ if (!$result) {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 8,
             CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_HTTPHEADER     => [
                 "Accept: application/json",
                 "Content-Type: application/json",
             ],
+            CURLOPT_USERAGENT      => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         ]);
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -87,15 +117,15 @@ if (!$result) {
 
         if ($httpCode === 200 && $response) {
             $data = json_decode($response, true);
-            if (!empty($data["data"])) {
-                $d = $data["data"];
+            $d = $data["data"] ?? $data ?? null;
+            if (!empty($d) && (!empty($d["tradeNam"]) || !empty($d["lgnm"]) || !empty($d["tradeName"]) || !empty($d["legalName"]))) {
                 $result = [
-                    "trade_name" => $d["tradeNam"] ?? $d["tradeName"] ?? "",
-                    "legal_name" => $d["lgnm"] ?? $d["legalName"] ?? "",
-                    "address"    => $d["pradr"]["adr"] ?? $d["address"] ?? "",
-                    "state"      => $d["pradr"]["addr"]["stcd"] ?? $stateName,
-                    "pincode"    => $d["pradr"]["addr"]["pncd"] ?? "",
-                    "city"       => $d["pradr"]["addr"]["dst"] ?? "",
+                    "trade_name"    => $d["tradeNam"] ?? $d["tradeName"] ?? "",
+                    "legal_name"    => $d["lgnm"] ?? $d["legalName"] ?? "",
+                    "address"       => $d["pradr"]["adr"] ?? $d["address"] ?? "",
+                    "state"         => $d["pradr"]["addr"]["stcd"] ?? $stateName,
+                    "pincode"       => $d["pradr"]["addr"]["pncd"] ?? "",
+                    "city"          => $d["pradr"]["addr"]["dst"] ?? "",
                     "business_type" => $d["ctb"] ?? $d["constitutionOfBusiness"] ?? "",
                 ];
             }
@@ -117,6 +147,8 @@ if ($result) {
         "state"         => $result["state"]          ?? $result["State"]        ?? $stateName,
         "pincode"       => $result["pincode"]        ?? $result["Pincode"]      ?? "",
         "business_type" => $result["business_type"]  ?? $result["BusinessType"] ?? "",
+        "status"        => $result["status"]         ?? "",
+        "nature"        => $result["nature"]         ?? "",
     ]);
 }
 
