@@ -1,0 +1,3993 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BizBoost — Grow Your Local Business with AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── THEMES ──────────────────────────────────────────────── */
+    :root, [data-theme="dark"] {
+      --bg: #060608;
+      --surface: #0d0d10;
+      --surface2: #14141a;
+      --surface3: #1c1c24;
+      --border: rgba(255,255,255,0.06);
+      --border2: rgba(255,255,255,0.12);
+      --text: #F0F0F5;
+      --text2: #c8c8d4;
+      --muted: rgba(240,240,245,0.5);
+      --muted2: rgba(240,240,245,0.28);
+      --accent: #2563EB;
+      --accent-glow: rgba(37,99,235,0.35);
+      --accent2: #60A5FA;
+      --green: #22C55E;
+      --orange: #F59E0B;
+      --purple: #A78BFA;
+      --red: #F87171;
+      --nav-bg: rgba(6,6,8,0.75);
+      --nav-border: rgba(255,255,255,0.07);
+      --modal-bg: rgba(6,6,8,0.95);
+      --card-bg: rgba(13,13,16,0.8);
+      --input-bg: rgba(255,255,255,0.04);
+      --input-border: rgba(255,255,255,0.1);
+      --shadow: 0 24px 60px rgba(0,0,0,0.6);
+      --r: 16px;
+      --nav-h: 52px;
+      color-scheme: dark;
+    }
+
+    [data-theme="light"] {
+      --bg: #F8F8FC;
+      --surface: #FFFFFF;
+      --surface2: #F2F2F8;
+      --surface3: #EAEAF2;
+      --border: rgba(0,0,0,0.07);
+      --border2: rgba(0,0,0,0.14);
+      --text: #0A0A14;
+      --text2: #2a2a40;
+      --muted: rgba(10,10,20,0.5);
+      --muted2: rgba(10,10,20,0.3);
+      --accent: #2563EB;
+      --accent-glow: rgba(37,99,235,0.2);
+      --accent2: #1D4ED8;
+      --green: #16A34A;
+      --orange: #D97706;
+      --purple: #7C3AED;
+      --red: #DC2626;
+      --nav-bg: rgba(248,248,252,0.82);
+      --nav-border: rgba(0,0,0,0.08);
+      --modal-bg: rgba(248,248,252,0.98);
+      --card-bg: rgba(255,255,255,0.9);
+      --input-bg: rgba(0,0,0,0.03);
+      --input-border: rgba(0,0,0,0.12);
+      --shadow: 0 24px 60px rgba(0,0,0,0.12);
+      --r: 16px;
+      --nav-h: 52px;
+      color-scheme: light;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    /* ── SCROLL PROGRESS ────────────────────────────────────── */
+    #scroll-progress {
+      position: fixed; top: 0; left: 0; height: 3px; z-index: 9997;
+      background: linear-gradient(90deg, var(--accent), var(--purple), var(--accent2));
+      width: 0%; transition: width 0.1s linear;
+      border-radius: 0 3px 3px 0;
+    }
+
+    /* ── RIPPLE EFFECT ──────────────────────────────────────── */
+    .ripple-container { position: relative; overflow: hidden; }
+    .ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,0.25); transform: scale(0);
+      animation: ripple-anim 0.5s linear; pointer-events: none;
+    }
+    @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+
+    /* ── MOBILE FLOATING CTA ────────────────────────────────── */
+    .mobile-fab {
+      display: none; position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%); z-index: 190;
+      background: var(--accent); color: #fff;
+      font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700;
+      padding: 14px 32px; border-radius: 50px; border: none;
+      box-shadow: 0 8px 32px rgba(37,99,235,0.5);
+      white-space: nowrap; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .mobile-fab:active { transform: translateX(-50%) scale(0.96); }
+    @media (max-width: 640px) { .mobile-fab { display: block; } }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      cursor: none;
+      transition: background 0.4s, color 0.4s;
+    }
+    @media (max-width: 640px) {
+      body { padding-bottom: 80px; cursor: auto; }
+      * { cursor: auto !important; }
+      #cursor, #cursor-ring { display: none; }
+    }
+
+    /* ── CUSTOM CURSOR ─────────────────────────────────────── */
+    #cursor {
+      position: fixed; width: 9px; height: 9px;
+      background: var(--accent); border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.08s, opacity 0.15s, width 0.2s, height 0.2s;
+    }
+    #cursor-ring {
+      position: fixed; width: 34px; height: 34px;
+      border: 1.5px solid rgba(37,99,235,0.5); border-radius: 50%;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: width 0.25s cubic-bezier(0.25,0.46,0.45,0.94),
+                  height 0.25s cubic-bezier(0.25,0.46,0.45,0.94),
+                  border-color 0.25s;
+    }
+    #cursor-ring.hover { width: 52px; height: 52px; border-color: rgba(37,99,235,0.8); }
+    body a, body button { cursor: none; }
+
+    /* ── NAV ───────────────────────────────────────────────── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: var(--nav-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px;
+      background: var(--nav-bg);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--nav-border);
+      transition: background 0.35s, border-color 0.35s;
+    }
+    .nav-logo {
+      font-family: 'Sora', sans-serif;
+      font-size: 18px; font-weight: 800; color: var(--text);
+      text-decoration: none; letter-spacing: -0.05em;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links {
+      display: flex; gap: 36px; list-style: none;
+      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .nav-links a {
+      font-size: 13.5px; font-weight: 500; color: var(--muted); text-decoration: none;
+      transition: color 0.15s; letter-spacing: -0.01em;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-right { display: flex; gap: 8px; align-items: center; }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid var(--border2);
+      background: var(--input-bg);
+      display: flex; align-items: center; justify-content: center;
+      cursor: none; transition: all 0.2s; position: relative; overflow: hidden;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+    .theme-toggle svg { width: 16px; height: 16px; transition: transform 0.4s, opacity 0.2s; }
+    .theme-toggle .icon-sun { position: absolute; }
+    .theme-toggle .icon-moon { position: absolute; }
+    [data-theme="dark"] .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }
+    [data-theme="dark"] .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
+    [data-theme="light"] .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
+    [data-theme="light"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+
+    .btn-ghost {
+      font-size: 13px; font-weight: 500; padding: 7px 16px;
+      border-radius: 980px; border: 1px solid var(--border2);
+      color: var(--text); text-decoration: none;
+      background: transparent; transition: all 0.2s; cursor: none;
+    }
+    .btn-ghost:hover { background: var(--surface2); }
+    .btn-accent {
+      font-family: 'Sora', sans-serif;
+      font-size: 13px; font-weight: 600; padding: 8px 20px;
+      border-radius: 980px; border: none;
+      background: var(--accent); color: #fff; text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
+      cursor: none; position: relative; overflow: hidden;
+    }
+    .btn-accent:hover { transform: scale(1.04); box-shadow: 0 6px 28px var(--accent-glow); }
+
+    /* Hamburger — only shows on mobile */
+    .nav-burger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: none; background: none; border: none; padding: 8px;
+      width: 40px; height: 40px; align-items: center; justify-content: center;
+    }
+    .nav-burger span { width: 22px; height: 2px; background: var(--text); display: block; transition: all 0.35s cubic-bezier(0.23,1,0.32,1); border-radius: 2px; }
+    .nav-burger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+    .nav-burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .nav-burger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+    /* ── MOBILE FULL-SCREEN MENU ───────────────────────────── */
+    .nav-mobile-menu {
+      display: none;
+      position: fixed; inset: 0; z-index: 199;
+      background: var(--bg);
+      flex-direction: column;
+      padding: 0 28px 40px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+      overflow-y: auto;
+    }
+    .nav-mobile-menu.open { opacity: 1; pointer-events: all; }
+
+    /* Menu top bar */
+    .mob-menu-top {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px; flex-shrink: 0;
+    }
+    .mob-menu-close {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid var(--border2); background: var(--surface2);
+      color: var(--text); display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Big nav links */
+    .mob-nav-links {
+      display: flex; flex-direction: column;
+      gap: 2px; flex: 1;
+      margin-top: 20px;
+    }
+    .mob-nav-links a {
+      display: flex; align-items: center; gap: 16px;
+      font-family: 'Sora', sans-serif;
+      font-size: 28px; font-weight: 800; letter-spacing: -0.04em;
+      color: var(--text); text-decoration: none;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.2s, padding-left 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .mob-nav-links a:last-child { border-bottom: none; }
+    .mob-nav-links a:active { color: var(--accent); padding-left: 6px; }
+    .mob-link-num {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      color: var(--muted2); font-family: 'DM Sans', sans-serif;
+      min-width: 24px;
+    }
+
+    /* Auth buttons in menu */
+    .mob-menu-actions {
+      display: flex; flex-direction: column; gap: 12px;
+      margin-top: 32px;
+    }
+    .mob-start-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 18px 24px;
+      background: var(--accent); color: #fff; border: none; border-radius: 16px;
+      font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+      letter-spacing: -0.02em;
+    }
+    .mob-start-btn:active { transform: scale(0.97); }
+    .mob-signin-btn {
+      width: 100%; padding: 16px 24px;
+      background: transparent; color: var(--text); border: 1.5px solid var(--border2);
+      border-radius: 16px; font-family: 'Sora', sans-serif;
+      font-size: 16px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .mob-signin-btn:active { background: var(--surface2); }
+
+    /* Menu footer */
+    .mob-menu-footer {
+      margin-top: 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .mob-theme-btn {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 50px; padding: 10px 18px; color: var(--text);
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .mob-theme-btn .icon-sun { display: none; }
+    .mob-theme-btn .icon-moon { display: block; }
+    [data-theme="light"] .mob-theme-btn .icon-sun { display: block; }
+    [data-theme="light"] .mob-theme-btn .icon-moon { display: none; }
+    .mob-menu-tagline { font-size: 12px; color: var(--muted2); }
+
+    /* ── HERO ──────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center;
+      padding: 120px 24px 100px;
+      position: relative; overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(37,99,235,0.14) 0%, transparent 60%),
+                  radial-gradient(ellipse 60% 50% at 80% 30%, rgba(96,165,250,0.08) 0%, transparent 60%),
+                  radial-gradient(ellipse 70% 60% at 50% 95%, rgba(34,197,94,0.05) 0%, transparent 60%);
+      animation: meshshift 14s ease-in-out infinite alternate;
+    }
+    [data-theme="light"] .hero-bg {
+      background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(37,99,235,0.08) 0%, transparent 60%),
+                  radial-gradient(ellipse 60% 50% at 80% 30%, rgba(96,165,250,0.05) 0%, transparent 60%),
+                  radial-gradient(ellipse 70% 60% at 50% 95%, rgba(34,197,94,0.04) 0%, transparent 60%);
+    }
+    @keyframes meshshift {
+      0%   { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(12deg); opacity: 0.85; }
+    }
+
+    .hero-grid {
+      position: absolute; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black, transparent);
+      -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black, transparent);
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px 6px 8px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 980px; font-size: 12px; font-weight: 500;
+      color: var(--muted); margin-bottom: 28px;
+      position: relative; z-index: 1;
+      animation: fadeup 0.7s both;
+    }
+    .hero-badge-dot {
+      width: 18px; height: 18px; background: var(--green);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .hero-badge-dot::after {
+      content: ''; width: 8px; height: 8px; background: #fff; border-radius: 50%;
+    }
+    .hero-badge strong { color: var(--text); }
+
+    .hero-h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(42px, 7vw, 80px);
+      font-weight: 800; letter-spacing: -0.05em; line-height: 1.06;
+      position: relative; z-index: 1;
+      animation: fadeup 0.7s 0.1s both;
+    }
+    .hero-h1 .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 50%, var(--accent2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      margin-top: 20px; font-size: clamp(16px, 2vw, 19px);
+      color: var(--muted); max-width: 540px; line-height: 1.65;
+      position: relative; z-index: 1;
+      animation: fadeup 0.7s 0.2s both;
+    }
+
+    /* Buyer search bar */
+    .buyer-bar {
+      display: flex; gap: 0; margin-top: 44px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 16px; overflow: hidden;
+      max-width: 600px; width: 100%;
+      position: relative; z-index: 1;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+      animation: fadeup 0.7s 0.3s both;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .buyer-bar:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-glow), 0 8px 40px rgba(0,0,0,0.3);
+    }
+    .buyer-bar input {
+      flex: 1; padding: 16px 18px; background: transparent; border: none; outline: none;
+      font-family: inherit; font-size: 15px; color: var(--text);
+      min-width: 0;
+    }
+    .buyer-bar input::placeholder { color: var(--muted2); }
+    .buyer-divider { width: 1px; background: var(--border2); margin: 12px 0; flex-shrink: 0; }
+    .buyer-bar-btn {
+      padding: 12px 22px; background: var(--accent); color: #fff; border: none;
+      font-family: 'Sora', sans-serif; font-size: 13.5px; font-weight: 600;
+      cursor: none; transition: background 0.2s; margin: 5px; border-radius: 11px;
+      white-space: nowrap;
+    }
+    .buyer-bar-btn:hover { background: #1D4ED8; }
+
+    .hero-chips {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+      margin-top: 18px; position: relative; z-index: 1;
+      animation: fadeup 0.7s 0.4s both;
+      max-width: 600px; width: 100%;
+    }
+    .hero-chip {
+      padding: 6px 14px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 980px; font-size: 12.5px; color: var(--muted);
+      cursor: none; transition: all 0.2s;
+    }
+    .hero-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    .hero-stats {
+      display: flex; gap: 40px; margin-top: 56px; position: relative; z-index: 1;
+      animation: fadeup 0.7s 0.5s both;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-num {
+      font-family: 'Sora', sans-serif;
+      font-size: 28px; font-weight: 800; letter-spacing: -0.04em; color: var(--text);
+    }
+    .hero-stat-label { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    /* Typing */
+    .typing-wrapper {
+      position: relative; z-index: 1; margin-bottom: 12px;
+      animation: fadeup 0.7s 0.05s both;
+    }
+    .typing-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500; color: var(--accent);
+      background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.25);
+      padding: 5px 14px; border-radius: 980px;
+    }
+    .typing-tag #typingText {
+      min-width: 120px; text-align: left;
+    }
+    .typing-tag #typingText::after {
+      content: '|'; animation: blink 1s step-end infinite; margin-left: 1px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── SECTIONS ──────────────────────────────────────────── */
+    section { padding: 100px 24px; }
+    .section-label {
+      display: inline-block; font-size: 11.5px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 16px;
+    }
+    .section-h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(30px, 4.5vw, 52px); font-weight: 800;
+      letter-spacing: -0.05em; line-height: 1.1; color: var(--text);
+    }
+    .section-sub {
+      font-size: 17px; color: var(--muted); line-height: 1.65;
+      max-width: 500px; margin-top: 14px;
+    }
+    .container { max-width: 1080px; margin: 0 auto; }
+    .text-center { text-align: center; }
+    .text-center .section-sub { margin: 14px auto 0; }
+
+    /* ── HOW IT WORKS ──────────────────────────────────────── */
+    #how { background: var(--bg); }
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      margin-top: 56px;
+    }
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r); padding: 32px 28px;
+      transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .step-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% -20%, var(--accent-glow), transparent);
+      opacity: 0; transition: opacity 0.35s;
+    }
+    .step-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 20px 48px rgba(0,0,0,0.25); }
+    .step-card:hover::before { opacity: 1; }
+    .step-card:hover .step-icon { transform: scale(1.1); }
+    .step-icon { transition: transform 0.3s; }
+    .step-num {
+      font-family: 'Sora', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      color: var(--accent); background: rgba(37,99,235,0.1);
+      border: 1px solid rgba(37,99,235,0.2); border-radius: 6px;
+      padding: 3px 9px; display: inline-block; margin-bottom: 20px;
+    }
+    .step-icon {
+      width: 48px; height: 48px; background: var(--surface2);
+      border: 1px solid var(--border2); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px; color: var(--accent);
+    }
+    .step-icon svg { width: 22px; height: 22px; }
+    .step-h { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.03em; color: var(--text); margin-bottom: 10px; }
+    .step-p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+    /* ── FEATURES ──────────────────────────────────────────── */
+    #features { background: var(--surface); }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-top: 56px;
+    }
+    .feat-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 28px 26px;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .feat-card::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% -20%, var(--accent-glow), transparent);
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .feat-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 20px 48px rgba(0,0,0,0.25); }
+    .feat-card:hover::after { opacity: 1; }
+    .feat-icon {
+      width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+      border-radius: 12px; margin-bottom: 18px; position: relative; z-index: 1;
+      transition: transform 0.3s;
+    }
+    .feat-card:hover .feat-icon { transform: scale(1.1) rotate(-4deg); }
+    .feat-icon svg { width: 24px; height: 24px; }
+    .fi-blue  { background: rgba(37,99,235,0.12);  color: var(--accent); border: 1px solid rgba(37,99,235,0.25); }
+    .fi-green { background: rgba(34,197,94,0.12);  color: var(--green);  border: 1px solid rgba(34,197,94,0.25); }
+    .fi-purple{ background: rgba(167,139,250,0.12);color: var(--purple); border: 1px solid rgba(167,139,250,0.25); }
+    .fi-orange{ background: rgba(245,158,11,0.12); color: var(--orange); border: 1px solid rgba(245,158,11,0.25); }
+    .fi-red   { background: rgba(248,113,113,0.12);color: var(--red);    border: 1px solid rgba(248,113,113,0.25); }
+    .fi-cyan  { background: rgba(6,182,212,0.12);  color: #06B6D4;       border: 1px solid rgba(6,182,212,0.25); }
+    .feat-h { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: -0.03em; color: var(--text); margin-bottom: 8px; position: relative; z-index: 1; }
+    .feat-p { font-size: 13.5px; color: var(--muted); line-height: 1.65; position: relative; z-index: 1; }
+    .feat-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; position: relative; z-index: 1; }
+    .feat-tag {
+      font-size: 11.5px; font-weight: 500; padding: 4px 10px;
+      background: rgba(37,99,235,0.1); color: var(--accent);
+      border-radius: 6px;
+    }
+
+    /* ── TESTIMONIALS ──────────────────────────────────────── */
+    #proof { background: var(--bg); overflow: hidden; }
+    .proof-track-wrap { overflow: hidden; position: relative; margin-top: 52px; }
+    .proof-track-wrap::before, .proof-track-wrap::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2;
+      pointer-events: none;
+    }
+    .proof-track-wrap::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+    .proof-track-wrap::after { right: 0; background: linear-gradient(-90deg, var(--bg), transparent); }
+    .proof-track {
+      display: flex; gap: 16px;
+      animation: scrolltrack 52s linear infinite;
+      width: max-content;
+    }
+    .proof-track:hover { animation-play-state: paused; }
+    @keyframes scrolltrack { to { transform: translateX(-50%); } }
+    .tcard {
+      width: 310px; flex-shrink: 0;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 24px 22px;
+      transition: border-color 0.2s;
+    }
+    .tcard:hover { border-color: var(--border2); }
+    .tcard-stars { display: flex; gap: 3px; margin-bottom: 12px; }
+    .tcard-body { font-size: 13.5px; color: var(--text2); line-height: 1.65; margin-bottom: 18px; }
+    .tcard-author { display: flex; align-items: center; gap: 12px; }
+    .tcard-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .av1 { background: linear-gradient(135deg, #2563EB, #7C3AED); }
+    .av2 { background: linear-gradient(135deg, #059669, #0284C7); }
+    .av3 { background: linear-gradient(135deg, #D97706, #DC2626); }
+    .av4 { background: linear-gradient(135deg, #7C3AED, #EC4899); }
+    .av5 { background: linear-gradient(135deg, #0284C7, #2563EB); }
+    .av6 { background: linear-gradient(135deg, #EC4899, #F97316); }
+    .tcard-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .tcard-biz { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ── PRICING ───────────────────────────────────────────── */
+    #pricing { background: var(--surface); }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      margin-top: 56px; align-items: start;
+    }
+    .price-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 32px 28px;
+      transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+    }
+    .price-card:hover { border-color: var(--border2); transform: translateY(-4px); }
+    .price-card.featured {
+      background: var(--accent); border-color: var(--accent);
+      box-shadow: 0 0 60px rgba(37,99,235,0.35);
+    }
+    .price-card.featured:hover { transform: translateY(-6px); box-shadow: 0 0 80px rgba(37,99,235,0.45); }
+    .price-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+    .price-card.featured .price-label { color: rgba(255,255,255,0.7); }
+    .price-amount { font-family: 'Sora', sans-serif; font-size: 44px; font-weight: 800; letter-spacing: -0.05em; color: var(--text); line-height: 1; }
+    .price-card.featured .price-amount { color: #fff; }
+    .price-amount sup { font-size: 20px; vertical-align: top; margin-top: 8px; display: inline-block; }
+    .price-amount span { font-size: 16px; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+    .price-amount .price-val { all: unset; font-family: 'Sora', sans-serif; font-size: 44px; font-weight: 800; letter-spacing: -0.05em; }
+    .price-card.featured .price-amount span { color: rgba(255,255,255,0.6); }
+    .price-card.featured .price-amount .price-val { color: #fff; }
+    .price-desc { font-size: 13.5px; color: var(--muted); margin-top: 12px; line-height: 1.55; }
+    .price-card.featured .price-desc { color: rgba(255,255,255,0.75); }
+    .price-div { height: 1px; background: var(--border); margin: 22px 0; }
+    .price-card.featured .price-div { background: rgba(255,255,255,0.2); }
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .price-features li { font-size: 13.5px; color: var(--muted); display: flex; align-items: flex-start; gap: 10px; }
+    .price-card.featured .price-features li { color: rgba(255,255,255,0.85); }
+    .price-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .price-card.featured .price-features li::before { color: #fff; }
+    .price-cta {
+      display: block; width: 100%; margin-top: 28px;
+      padding: 13px 20px; border-radius: 980px; border: 1px solid var(--border2);
+      background: transparent; font-family: 'Sora', sans-serif;
+      font-size: 13.5px; font-weight: 600; color: var(--text);
+      text-align: center; cursor: none; transition: all 0.2s;
+    }
+    .price-cta:hover { background: var(--surface3); }
+    .price-card.featured .price-cta { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #fff; }
+    .price-card.featured .price-cta:hover { background: rgba(255,255,255,0.25); }
+
+    /* ── CTA BANNER ────────────────────────────────────────── */
+    #cta { background: var(--bg); }
+    .cta-box {
+      background: linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(124,58,237,0.08) 100%);
+      border: 1px solid var(--border2);
+      border-radius: 24px; padding: 72px 48px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-box::before {
+      content: ''; position: absolute;
+      top: -80px; left: 50%; transform: translateX(-50%);
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(37,99,235,0.15), transparent 70%);
+      pointer-events: none;
+    }
+    .cta-box .section-h2 { position: relative; }
+    .cta-box .section-sub { position: relative; margin: 0 auto; margin-top: 14px; }
+    .cta-email-row {
+      display: flex; gap: 10px; max-width: 440px; margin: 36px auto 0;
+      position: relative;
+    }
+    .cta-email-row input {
+      flex: 1; padding: 13px 18px; background: var(--surface2);
+      border: 1px solid var(--border2); border-radius: 12px;
+      font-family: inherit; font-size: 14px; color: var(--text); outline: none;
+      transition: border-color 0.2s;
+    }
+    .cta-email-row input:focus { border-color: var(--accent); }
+    .cta-email-row input::placeholder { color: var(--muted2); }
+    .cta-email-row .btn-accent { white-space: nowrap; padding: 13px 24px; border-radius: 12px; }
+
+    /* ── FOOTER ────────────────────────────────────────────── */
+    footer {
+      padding: 52px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .footer-inner {
+      max-width: 1080px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      flex-wrap: wrap; gap: 40px;
+    }
+    .footer-brand .nav-logo { font-size: 20px; }
+    .footer-brand p { font-size: 13px; color: var(--muted); margin-top: 10px; max-width: 240px; line-height: 1.6; }
+    .footer-links-group h4 { font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 16px; }
+    .footer-links-group ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links-group a { font-size: 13.5px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    .footer-links-group a:hover { color: var(--text); }
+    .footer-bottom { max-width: 1080px; margin: 36px auto 0; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-bottom p { font-size: 12.5px; color: var(--muted2); }
+
+    /* ── AUTH MODAL ────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 22px; width: 100%; max-width: 440px;
+      box-shadow: var(--shadow);
+      transform: translateY(22px) scale(0.97); transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
+      overflow: hidden;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+
+    /* Header */
+    .modal-header {
+      padding: 22px 26px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-logo { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 800; letter-spacing: -0.05em; color: var(--text); }
+    .modal-logo span { color: var(--accent); }
+    .modal-close {
+      width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border2);
+      background: var(--surface2); color: var(--muted);
+      display: flex; align-items: center; justify-content: center; cursor: none;
+      transition: all 0.2s;
+    }
+    .modal-close:hover { background: var(--surface3); color: var(--text); }
+
+    /* Role Toggle — the big pill at top */
+    .role-toggle-wrap {
+      padding: 18px 26px 0;
+    }
+    .role-toggle {
+      display: grid; grid-template-columns: 1fr 1fr;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 4px; gap: 4px;
+    }
+    .role-btn {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 10px 14px; border-radius: 9px; border: none;
+      background: transparent; cursor: none;
+      font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700;
+      color: var(--muted); transition: all 0.22s; position: relative;
+    }
+    .role-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .role-btn.seller-on {
+      background: rgba(37,99,235,0.15); color: var(--accent);
+      box-shadow: 0 1px 8px rgba(37,99,235,0.18);
+    }
+    .role-btn.buyer-on {
+      background: rgba(34,197,94,0.12); color: var(--green);
+      box-shadow: 0 1px 8px rgba(34,197,94,0.15);
+    }
+    .role-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 4px; margin-left: 2px;
+    }
+    .seller-badge { background: rgba(37,99,235,0.18); color: var(--accent); }
+    .buyer-badge  { background: rgba(34,197,94,0.14); color: var(--green); }
+
+    /* Context label that changes based on role */
+    .role-context {
+      padding: 10px 26px 0;
+      font-size: 12px; color: var(--muted2); line-height: 1.5;
+      transition: opacity 0.2s;
+    }
+
+    /* Action tabs (Sign In / Register) */
+    .modal-tabs {
+      display: flex; padding: 14px 26px 0; gap: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-tab {
+      flex: 1; padding: 8px 14px; background: transparent; border: none;
+      font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+      color: var(--muted); cursor: none; transition: color 0.18s;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .modal-tab.on { color: var(--accent); border-bottom-color: var(--accent); }
+    /* Buyer mode: green underline */
+    .modal-box.buyer-mode .modal-tab.on { color: var(--green); border-bottom-color: var(--green); }
+
+    .modal-body { padding: 22px 26px 26px; }
+
+    /* Form submit colors */
+    .form-submit.buyer-submit { background: var(--green); }
+    .form-submit.buyer-submit:hover:not(:disabled) { background: #16A34A; box-shadow: 0 6px 24px rgba(34,197,94,0.3); }
+    [data-theme="light"] .form-submit.buyer-submit:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(22,163,74,0.28); }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block; font-size: 12px; font-weight: 600;
+      letter-spacing: 0.04em; color: var(--muted); margin-bottom: 7px;
+      text-transform: uppercase;
+    }
+    .form-input {
+      width: 100%; padding: 12px 16px;
+      background: var(--input-bg); border: 1px solid var(--input-border);
+      border-radius: 10px; font-family: inherit; font-size: 14.5px; color: var(--text);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .form-input::placeholder { color: var(--muted2); }
+    .form-input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(248,113,113,0.15); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .form-select {
+      width: 100%; padding: 12px 16px;
+      background: var(--input-bg); border: 1px solid var(--input-border);
+      border-radius: 10px; font-family: inherit; font-size: 14.5px; color: var(--text);
+      outline: none; transition: border-color 0.2s; cursor: none;
+      -webkit-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+    }
+    .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .form-select option { background: var(--surface2); color: var(--text); }
+
+    .form-err {
+      display: none; padding: 10px 14px; background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.3); border-radius: 8px;
+      font-size: 13px; color: var(--red); margin-bottom: 16px;
+    }
+    .form-err.show { display: block; }
+
+    .form-success {
+      display: none; padding: 10px 14px; background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.3); border-radius: 8px;
+      font-size: 13px; color: var(--green); margin-bottom: 16px;
+    }
+    .form-success.show { display: block; }
+
+    .form-submit {
+      width: 100%; padding: 13px 20px;
+      background: var(--accent); border: none; border-radius: 10px;
+      font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700;
+      color: #fff; cursor: none; transition: all 0.25s;
+      position: relative; overflow: hidden; margin-top: 4px;
+    }
+    .form-submit:hover:not(:disabled) { background: #1D4ED8; box-shadow: 0 6px 24px var(--accent-glow); transform: translateY(-1px); }
+    .form-submit:disabled { opacity: 0.6; }
+
+    .form-footer { text-align: center; margin-top: 18px; font-size: 13px; color: var(--muted); }
+    .form-footer a { color: var(--accent); text-decoration: none; }
+    .form-footer a:hover { text-decoration: underline; }
+
+    .form-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 18px 0; color: var(--muted2); font-size: 12px;
+    }
+    .form-divider::before, .form-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Password toggle */
+    .input-wrap { position: relative; }
+    .input-wrap .form-input { padding-right: 44px; }
+    .pwd-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--muted); cursor: none;
+      padding: 4px; display: flex; align-items: center;
+    }
+    .pwd-toggle:hover { color: var(--text); }
+    .pwd-toggle svg { width: 18px; height: 18px; }
+
+    /* ── SELLER SECTION ────────────────────────────────────── */
+    #sellers { background: var(--surface); }
+    .seller-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;
+      margin-top: 40px;
+    }
+    .seller-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 22px 20px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .seller-card:hover { border-color: var(--border2); transform: translateY(-3px); }
+    .seller-cat { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted2); margin-bottom: 8px; }
+    .seller-name { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.03em; margin-bottom: 4px; }
+    .seller-loc { font-size: 12.5px; color: var(--muted); }
+
+    /* Demo sellers */
+    .demo-sellers { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 40px; }
+
+    /* ── ANIMATIONS ────────────────────────────────────────── */
+    @keyframes fadeup {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.65s cubic-bezier(0.25,0.46,0.45,0.94),
+                  transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ────────────────────────────────────────── */
+
+    /* Tablet: 2-col features */
+    @media (max-width: 960px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; gap: 16px; }
+    }
+
+    /* ── TABLET (768px) ─────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-right  { display: none; }
+      .nav-burger { display: flex; }
+      .nav-mobile-menu { display: flex; }
+      .nav { padding: 0 20px; }
+      section { padding: 80px 24px; }
+      .hero { padding: 100px 24px 88px; min-height: auto; }
+      .features-grid { grid-template-columns: 1fr; gap: 14px; }
+      .form-row { grid-template-columns: 1fr; }
+      .feat-card.wide { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; gap: 36px; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .cta-box { padding: 56px 28px; }
+      .cta-email-row { flex-direction: column; gap: 12px; }
+      .cta-email-row .btn-accent { width: 100%; text-align: center; }
+      .modal-overlay { align-items: flex-end; padding: 0; }
+      .modal-box { border-radius: 28px 28px 0 0; max-width: 100%; max-height: 92vh; overflow-y: auto; }
+    }
+
+    /* ── MOBILE (480px) — ground-up ─────────────────────── */
+    @media (max-width: 480px) {
+
+      /* Nav: clean, just logo + burger */
+      .nav { padding: 0 20px; height: 60px; }
+      .nav-logo { font-size: 20px; }
+
+      /* Hero: open, left-aligned, spacious */
+      .hero {
+        padding: 88px 22px 72px;
+        align-items: flex-start;
+        text-align: left;
+        min-height: 100svh;
+      }
+      .typing-wrapper { display: none; }
+      .hero-badge { font-size: 12px; padding: 5px 12px 5px 7px; margin-bottom: 22px; }
+      .hero-h1 { font-size: clamp(36px, 11vw, 52px); line-height: 1.05; letter-spacing: -0.04em; }
+      .hero-sub { font-size: 15px; line-height: 1.6; margin-top: 14px; max-width: 100%; }
+
+      /* Search bar */
+      .buyer-bar {
+        flex-direction: column;
+        margin-top: 28px;
+        border-radius: 20px;
+        width: 100%; max-width: 100%;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+      }
+      .buyer-bar:focus-within { box-shadow: 0 0 0 3px var(--accent-glow), 0 12px 40px rgba(0,0,0,0.35); }
+      .buyer-bar input { padding: 18px 20px; font-size: 16px; }
+      .buyer-divider { width: calc(100% - 24px); height: 1px; margin: 0 12px; }
+      .buyer-bar-btn { margin: 10px; border-radius: 13px; padding: 16px 20px; font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+
+      /* Chips: horizontal scroll */
+      .hero-chips {
+        flex-wrap: nowrap; overflow-x: auto;
+        -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        justify-content: flex-start; margin-top: 16px;
+        gap: 8px; width: 100%; max-width: 100%;
+      }
+      .hero-chips::-webkit-scrollbar { display: none; }
+      .hero-chip { flex-shrink: 0; padding: 8px 16px; font-size: 13px; }
+
+      /* Stats: 2×2 boxed grid */
+      .hero-stats {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+        margin-top: 40px; width: 100%;
+        border: 1px solid var(--border); border-radius: 20px;
+        overflow: hidden; background: var(--surface2);
+      }
+      .hero-stat { padding: 20px 18px; text-align: center; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+      .hero-stat:nth-child(2n) { border-right: none; }
+      .hero-stat:nth-child(3), .hero-stat:nth-child(4) { border-bottom: none; }
+      .hero-stat-num { font-size: 26px; }
+      .hero-stat-label { font-size: 11px; margin-top: 4px; }
+
+      /* Sections */
+      section { padding: 72px 20px; }
+      .section-h2 { font-size: clamp(28px, 8vw, 38px); }
+      .section-sub { font-size: 15px; line-height: 1.6; }
+
+      /* Cards */
+      .feat-card { padding: 28px 22px; border-radius: 20px; }
+      .feat-icon { width: 52px; height: 52px; border-radius: 14px; margin-bottom: 18px; }
+      .feat-icon svg { width: 22px; height: 22px; }
+      .feat-h { font-size: 17px; line-height: 1.3; }
+      .feat-p { font-size: 14px; line-height: 1.7; margin-top: 6px; }
+      .feat-tag { font-size: 12px; padding: 5px 12px; }
+      .step-card { padding: 28px 22px; border-radius: 20px; }
+      .step-h { font-size: 18px; }
+      .step-p { font-size: 14px; line-height: 1.7; }
+      .price-card { padding: 28px 22px; border-radius: 20px; }
+      .price-card.featured { transform: none !important; }
+      .price-amount { font-size: 42px; }
+      .tcard { width: 270px; }
+
+      /* CTA + footer */
+      .cta-box { padding: 48px 22px; border-radius: 20px; }
+      footer { padding: 52px 20px 40px; }
+      .footer-links-group ul { gap: 14px; }
+
+      /* FAB */
+      .mobile-fab { bottom: 20px; padding: 17px 40px; font-size: 15px; font-weight: 700; border-radius: 100px; box-shadow: 0 8px 36px rgba(37,99,235,0.55); }
+
+      /* Modal sheet */
+      .modal-box { border-radius: 28px 28px 0 0; }
+      .modal-header { padding: 24px 22px 0; }
+      .modal-body { padding: 20px 22px 40px; }
+      .role-toggle-wrap { padding: 16px 22px 0; }
+      .modal-tabs { padding: 14px 22px 0; }
+      .role-context { padding: 10px 22px 0; }
+      .form-input, .form-select { padding: 15px 16px; font-size: 15px; border-radius: 12px; }
+      .form-submit { padding: 16px 20px; font-size: 15px; border-radius: 12px; margin-top: 6px; }
+      .form-label { font-size: 11px; margin-bottom: 6px; }
+      .form-group { margin-bottom: 18px; }
+    }
+
+    @media (max-width: 360px) {
+      .hero-h1 { font-size: 32px; }
+      .hero { padding: 84px 18px 64px; }
+      .nav { padding: 0 16px; }
+      .mob-nav-links a { font-size: 24px; }
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       MOBILE APP SHELL — only active on ≤480px
+       ═══════════════════════════════════════════════════════ */
+    #mob-app {
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+
+      /* ── HIDE ENTIRE DESKTOP PAGE ────────────────────── */
+      #scroll-progress,
+      .nav, .nav-mobile-menu, .mobile-fab,
+      #cursor, #cursor-ring,
+      .hero, .trusted-section, #how, #features, #proof,
+      #stats-highlight, #compare, #pricing, #faq, #cta, footer,
+      #back-to-top, #toast-container {
+        display: none !important;
+      }
+
+      /* ── BODY ────────────────────────────────────────── */
+      body { overflow: hidden; cursor: auto; padding-bottom: 0; }
+      * { cursor: auto !important; }
+
+      /* ── SHELL LAYOUT ────────────────────────────────── */
+      #mob-app {
+        display: flex; flex-direction: column;
+        position: fixed; inset: 0; z-index: 1;
+        height: 100svh; overflow: hidden;
+        background: var(--bg);
+      }
+
+      /* ── TOP BAR ─────────────────────────────────────── */
+      .mb-top {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 18px; height: 54px; flex-shrink: 0;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+        position: relative; z-index: 5;
+      }
+      .mb-logo {
+        font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 800;
+        color: var(--text); text-decoration: none; letter-spacing: -0.05em;
+      }
+      .mb-logo span { color: var(--accent); }
+      .mb-top-r { display: flex; align-items: center; gap: 8px; }
+      .mb-theme {
+        width: 34px; height: 34px; border-radius: 50%;
+        border: 1px solid var(--border2); background: var(--surface2);
+        color: var(--muted); display: flex; align-items: center; justify-content: center;
+      }
+      .mb-theme .ic-sun  { display: none; }
+      .mb-theme .ic-moon { display: block; }
+      [data-theme="light"] .mb-theme .ic-sun  { display: block; }
+      [data-theme="light"] .mb-theme .ic-moon { display: none; }
+      .mb-signin {
+        padding: 7px 14px; border-radius: 50px;
+        border: 1.5px solid var(--border2); background: transparent;
+        color: var(--text); font-family: 'Sora', sans-serif;
+        font-size: 12.5px; font-weight: 600;
+      }
+
+      /* ── PAGES (native scroll-snap — no JS animation needed) */
+      .mb-pages {
+        flex: 1;
+        display: flex;
+        overflow-x: scroll;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        overscroll-behavior-x: contain;
+      }
+      .mb-pages::-webkit-scrollbar { display: none; }
+      .mb-page {
+        flex-shrink: 0;
+        width: 100%;
+        height: 100%;
+        scroll-snap-align: start;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+      }
+
+      /* ── PAGE INNER PADDING ──────────────────────────── */
+      .mb-pi {
+        padding: 22px 18px 32px;
+        min-height: 100%;
+        display: flex; flex-direction: column;
+      }
+
+      /* ── SHARED SECTION LABELS ───────────────────────── */
+      .mb-label {
+        font-size: 10.5px; font-weight: 700; letter-spacing: 0.13em;
+        text-transform: uppercase; color: var(--accent);
+        display: block; margin-bottom: 7px;
+      }
+      .mb-h2 {
+        font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800;
+        letter-spacing: -0.04em; line-height: 1.1; color: var(--text);
+        margin-bottom: 6px;
+      }
+      .mb-h2-sm { font-size: 24px; margin-bottom: 0; }
+      .mb-sub {
+        font-size: 13px; color: var(--muted); margin-bottom: 22px;
+        line-height: 1.5;
+      }
+      .mb-grad {
+        background: linear-gradient(135deg, var(--accent), var(--purple));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* ── HOME: BADGE ─────────────────────────────────── */
+      .mb-badge {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 5px 12px 5px 7px; border-radius: 50px;
+        background: var(--surface2); border: 1px solid var(--border2);
+        font-size: 11.5px; color: var(--muted); margin-bottom: 18px;
+        align-self: flex-start;
+      }
+      .mb-badge-dot {
+        width: 7px; height: 7px; background: var(--green); border-radius: 50%;
+        box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
+        animation: mb-pulse 2s ease-in-out infinite; flex-shrink: 0;
+      }
+      @keyframes mb-pulse {
+        0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
+        50%      { box-shadow: 0 0 0 6px rgba(34,197,94,0.08); }
+      }
+      .mb-badge strong { color: var(--text); }
+
+      /* ── HOME: HEADLINE ──────────────────────────────── */
+      .mb-h1 {
+        font-family: 'Sora', sans-serif;
+        font-size: clamp(32px, 8.5vw, 42px); font-weight: 800;
+        letter-spacing: -0.04em; line-height: 1.07;
+        color: var(--text); margin-bottom: 20px;
+      }
+
+      /* ── HOME: SEARCH ────────────────────────────────── */
+      .mb-search {
+        display: flex; align-items: center;
+        background: var(--surface2); border: 1.5px solid var(--border2);
+        border-radius: 14px; overflow: hidden;
+        margin-bottom: 10px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .mb-search:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+      }
+      .mb-search-ic {
+        padding: 0 12px; color: var(--muted);
+        display: flex; align-items: center; flex-shrink: 0;
+      }
+      .mb-search-inp {
+        flex: 1; padding: 14px 8px; background: transparent; border: none; outline: none;
+        font-family: 'DM Sans', sans-serif; font-size: 14.5px; color: var(--text);
+        min-width: 0;
+      }
+      .mb-search-inp::placeholder { color: var(--muted2); }
+      .mb-search-btn {
+        width: 48px; height: 48px; background: var(--accent); border: none;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; flex-shrink: 0; transition: background 0.15s;
+      }
+      .mb-search-btn:active { background: #1D4ED8; transform: scale(0.96); }
+
+      /* ── HOME: CHIPS ─────────────────────────────────── */
+      .mb-chips {
+        display: flex; gap: 7px;
+        overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        padding-bottom: 2px; margin-bottom: 20px;
+      }
+      .mb-chips::-webkit-scrollbar { display: none; }
+      .mb-chip {
+        flex-shrink: 0; padding: 7px 13px;
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 50px; font-size: 12.5px; color: var(--muted);
+        font-family: 'DM Sans', sans-serif; white-space: nowrap;
+        transition: all 0.15s;
+      }
+      .mb-chip:active {
+        border-color: var(--accent); color: var(--accent);
+        background: rgba(37,99,235,0.08); transform: scale(0.95);
+      }
+
+      /* ── HOME: STATS GRID ────────────────────────────── */
+      .mb-stats {
+        display: grid; grid-template-columns: 1fr 1fr;
+        border: 1px solid var(--border); border-radius: 18px;
+        overflow: hidden; background: var(--surface2);
+        margin-bottom: 18px;
+      }
+      .mb-stat {
+        padding: 18px 14px; text-align: center;
+        border-right: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+      .mb-stat:nth-child(2n) { border-right: none; }
+      .mb-stat:nth-child(3), .mb-stat:nth-child(4) { border-bottom: none; }
+      .mb-stat-n {
+        font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800;
+        letter-spacing: -0.04em; color: var(--text);
+      }
+      .mb-stat-l { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+
+      /* ── PRIMARY CTA BUTTON ──────────────────────────── */
+      .mb-cta {
+        display: flex; align-items: center; justify-content: center; gap: 9px;
+        width: 100%; padding: 16px 18px;
+        background: var(--accent); color: #fff; border: none; border-radius: 14px;
+        font-family: 'Sora', sans-serif; font-size: 14.5px; font-weight: 700;
+        letter-spacing: -0.02em;
+        box-shadow: 0 6px 20px rgba(37,99,235,0.4);
+        transition: transform 0.12s, box-shadow 0.15s;
+      }
+      .mb-cta:active { transform: scale(0.97); box-shadow: 0 3px 10px rgba(37,99,235,0.3); }
+      .mb-cta-push { margin-top: auto; padding-top: 20px; }
+      .mb-cta-tight { margin-top: 10px; }
+
+      /* ── SECTION HEADER ──────────────────────────────── */
+      .mb-sec-hd { margin-bottom: 20px; }
+
+      /* ── HOW: STEP CARDS ─────────────────────────────── */
+      .mb-steps { display: flex; flex-direction: column; gap: 12px; }
+      .mb-step-card {
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 18px; padding: 20px 18px;
+        display: flex; gap: 16px; align-items: flex-start;
+      }
+      .mb-step-num {
+        font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700;
+        color: var(--accent); letter-spacing: 0.08em;
+        background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.2);
+        border-radius: 6px; padding: 3px 8px; flex-shrink: 0; margin-top: 2px;
+      }
+      .mb-step-body { flex: 1; min-width: 0; }
+      .mb-step-ic {
+        width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .mb-step-ic.blue   { background: rgba(37,99,235,0.12);  color: var(--accent);  border: 1px solid rgba(37,99,235,0.2); }
+      .mb-step-ic.purple { background: rgba(167,139,250,0.12); color: var(--purple);  border: 1px solid rgba(167,139,250,0.2); }
+      .mb-step-ic.green  { background: rgba(34,197,94,0.12);   color: var(--green);   border: 1px solid rgba(34,197,94,0.2); }
+      .mb-step-h { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+      .mb-step-p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+      /* ── FEATURES: FEATURE CARDS ─────────────────────── */
+      .mb-feats { display: flex; flex-direction: column; gap: 10px; }
+      .mb-feat-card {
+        background: var(--surface2); border: 1.5px solid var(--border);
+        border-radius: 18px; padding: 18px;
+        display: flex; gap: 14px; align-items: flex-start;
+        transition: border-color 0.2s;
+      }
+      .mb-feat-card:active { border-color: var(--card-color, var(--accent)); }
+      .mb-feat-ic {
+        width: 46px; height: 46px; border-radius: 13px; border: 1px solid;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      }
+      .mb-feat-body { flex: 1; min-width: 0; }
+      .mb-feat-h { font-family: 'Sora', sans-serif; font-size: 14.5px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+      .mb-feat-p { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+      .mb-feat-tags { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
+      .mb-feat-tag { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 6px; }
+
+      /* ── PRICING: TOGGLE ─────────────────────────────── */
+      .mb-bill-toggle {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 18px; padding: 4px 4px 4px 12px;
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 50px; align-self: flex-start;
+      }
+      .mb-bill-label { font-size: 12px; color: var(--muted); white-space: nowrap; font-family: 'DM Sans', sans-serif; }
+      .mb-bill-label.on { color: var(--text); font-weight: 600; }
+      .mb-bill-track {
+        width: 40px; height: 22px; background: var(--border2); border-radius: 50px;
+        position: relative; cursor: pointer; transition: background 0.25s; flex-shrink: 0;
+      }
+      .mb-bill-track.on { background: var(--accent); }
+      .mb-bill-knob {
+        position: absolute; top: 3px; left: 3px;
+        width: 16px; height: 16px; border-radius: 50%; background: #fff;
+        transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      }
+      .mb-bill-track.on .mb-bill-knob { transform: translateX(18px); }
+      .mb-bill-save {
+        font-size: 10px; font-weight: 700; color: #fff; letter-spacing: 0.05em;
+        background: var(--green); border-radius: 50px; padding: 3px 8px;
+        margin-left: 4px;
+      }
+
+      /* ── PRICING: CARDS ──────────────────────────────── */
+      .mb-plans { display: flex; flex-direction: column; gap: 12px; }
+      .mb-plan-card {
+        background: var(--surface2); border: 1.5px solid var(--border);
+        border-radius: 20px; padding: 22px 20px;
+        position: relative; overflow: hidden;
+      }
+      .mb-plan-card.featured {
+        background: var(--accent); border-color: var(--accent);
+        box-shadow: 0 10px 32px rgba(37,99,235,0.38);
+      }
+      .mb-plan-pop {
+        font-size: 10px; font-weight: 800; letter-spacing: 0.1em;
+        background: rgba(255,255,255,0.18); color: #fff;
+        padding: 3px 10px; border-radius: 50px; display: inline-block;
+        margin-bottom: 8px;
+      }
+      .mb-plan-name {
+        font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--muted); margin-bottom: 10px;
+      }
+      .mb-plan-card.featured .mb-plan-name { color: rgba(255,255,255,0.75); }
+      .mb-plan-price {
+        font-family: 'Sora', sans-serif; font-size: 40px; font-weight: 800;
+        letter-spacing: -0.05em; color: var(--text); line-height: 1;
+        display: flex; align-items: flex-start; gap: 2px; margin-bottom: 4px;
+      }
+      .mb-plan-price sup { font-size: 17px; margin-top: 7px; }
+      .mb-plan-price .mb-pp-val { display: inline; }
+      .mb-plan-price .mb-pp-per {
+        font-size: 15px; font-weight: 400; color: var(--muted); letter-spacing: 0;
+        align-self: flex-end; margin-bottom: 4px; margin-left: 1px;
+      }
+      .mb-plan-card.featured .mb-plan-price { color: #fff; }
+      .mb-plan-card.featured .mb-plan-price .mb-pp-per { color: rgba(255,255,255,0.65); }
+      .mb-plan-old {
+        font-size: 13px; color: var(--muted2); text-decoration: line-through;
+        margin-bottom: 10px; display: none;
+      }
+      .mb-bill-annual-mode .mb-plan-old { display: block; }
+      .mb-plan-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+      .mb-plan-card.featured .mb-plan-desc { color: rgba(255,255,255,0.75); }
+      .mb-plan-ul {
+        list-style: none; display: flex; flex-direction: column; gap: 8px;
+        margin-bottom: 18px;
+      }
+      .mb-plan-ul li {
+        font-size: 13px; color: var(--muted); display: flex; align-items: flex-start; gap: 8px;
+      }
+      .mb-plan-ul li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+      .mb-plan-card.featured .mb-plan-ul li { color: rgba(255,255,255,0.88); }
+      .mb-plan-card.featured .mb-plan-ul li::before { color: #fff; }
+      .mb-plan-btn {
+        width: 100%; padding: 13px; border-radius: 11px;
+        font-family: 'Sora', sans-serif; font-size: 13.5px; font-weight: 700;
+        transition: all 0.15s;
+      }
+      .mb-plan-btn.ghost { background: transparent; border: 1.5px solid var(--border2); color: var(--text); }
+      .mb-plan-btn.ghost:active { background: var(--surface3); }
+      .mb-plan-btn.white { background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.3); color: #fff; }
+      .mb-plan-btn.white:active { background: rgba(255,255,255,0.32); }
+
+      /* ── REVIEWS: CARDS ──────────────────────────────── */
+      .mb-rev-summary {
+        display: flex; align-items: center; gap: 12px;
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 16px; padding: 16px 18px; margin-bottom: 16px;
+      }
+      .mb-rev-big {
+        font-family: 'Sora', sans-serif; font-size: 38px; font-weight: 800;
+        color: var(--text); letter-spacing: -0.04em; line-height: 1;
+      }
+      .mb-rev-stars { color: #F59E0B; font-size: 15px; letter-spacing: 1px; }
+      .mb-rev-count { font-size: 12px; color: var(--muted); margin-top: 2px; }
+      .mb-revs { display: flex; flex-direction: column; gap: 10px; }
+      .mb-rev-card {
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 16px; padding: 16px;
+      }
+      .mb-rev-s { color: #F59E0B; font-size: 12px; letter-spacing: 1.5px; margin-bottom: 7px; }
+      .mb-rev-q { font-size: 13.5px; color: var(--text); line-height: 1.55; font-style: italic; margin-bottom: 11px; }
+      .mb-rev-auth { display: flex; align-items: center; gap: 9px; }
+      .mb-av {
+        width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+        font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700;
+        color: #fff; display: flex; align-items: center; justify-content: center;
+      }
+      .mb-av1 { background: linear-gradient(135deg,#2563EB,#7C3AED); }
+      .mb-av2 { background: linear-gradient(135deg,#059669,#0284C7); }
+      .mb-av3 { background: linear-gradient(135deg,#D97706,#DC2626); }
+      .mb-av4 { background: linear-gradient(135deg,#7C3AED,#EC4899); }
+      .mb-av5 { background: linear-gradient(135deg,#0284C7,#2563EB); }
+      .mb-rev-name { font-size: 12.5px; font-weight: 700; color: var(--text); }
+      .mb-rev-biz  { font-size: 11px; color: var(--muted); }
+
+      /* ── JOIN: TESTIMONIAL ───────────────────────────── */
+      .mb-testi {
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 18px; padding: 20px 18px; margin-bottom: 16px;
+      }
+      .mb-testi-s { color: #F59E0B; font-size: 14px; letter-spacing: 2px; margin-bottom: 9px; }
+      .mb-testi-q {
+        font-size: 14px; color: var(--text); line-height: 1.6;
+        font-style: italic; margin-bottom: 14px;
+        transition: opacity 0.3s, transform 0.3s;
+      }
+      .mb-testi-auth { display: flex; align-items: center; gap: 11px; }
+      .mb-testi-name { font-size: 13px; font-weight: 700; color: var(--text); }
+      .mb-testi-biz  { font-size: 11.5px; color: var(--muted); }
+      .mb-tdots { display: flex; gap: 5px; margin-top: 12px; }
+      .mb-tdot {
+        width: 5px; height: 5px; border-radius: 50%;
+        background: var(--border2); cursor: pointer; transition: all 0.25s;
+      }
+      .mb-tdot.on { background: var(--accent); width: 16px; border-radius: 3px; }
+
+      /* ── JOIN: FORM ──────────────────────────────────── */
+      .mb-join-card {
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 18px; padding: 22px 18px;
+      }
+      .mb-join-sub { font-size: 12.5px; color: var(--muted); margin: 6px 0 16px; line-height: 1.5; }
+      .mb-join-inp {
+        width: 100%; padding: 14px 15px;
+        background: var(--input-bg); border: 1.5px solid var(--input-border);
+        border-radius: 11px; font-family: 'DM Sans', sans-serif;
+        font-size: 14.5px; color: var(--text); outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .mb-join-inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+      .mb-join-inp::placeholder { color: var(--muted2); }
+      .mb-join-or { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 12px; }
+      .mb-join-or a { color: var(--accent); text-decoration: none; }
+
+      /* ── BOTTOM NAV ──────────────────────────────────── */
+      .mb-nav {
+        display: flex; align-items: center; justify-content: space-around;
+        height: 60px; flex-shrink: 0;
+        background: var(--bg); border-top: 1px solid var(--border);
+        position: relative; z-index: 5;
+        padding: 0 4px;
+      }
+      .mb-nb {
+        display: flex; flex-direction: column; align-items: center; gap: 3px;
+        flex: 1; padding: 8px 2px;
+        background: none; border: none;
+        color: var(--muted); transition: color 0.18s;
+        font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500;
+        position: relative; letter-spacing: 0.01em;
+      }
+      .mb-nb.on { color: var(--accent); }
+      .mb-nb.on::before {
+        content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+        width: 28px; height: 2.5px; background: var(--accent);
+        border-radius: 0 0 4px 4px;
+      }
+      .mb-nb.join-btn {
+        background: var(--accent); color: #fff !important;
+        border-radius: 12px; margin: 8px 5px;
+        padding: 7px 10px; flex: none; width: 58px;
+        box-shadow: 0 3px 12px rgba(37,99,235,0.45);
+        transition: transform 0.12s, box-shadow 0.15s;
+      }
+      .mb-nb.join-btn.on { color: #fff !important; }
+      .mb-nb.join-btn.on::before { display: none; }
+      .mb-nb.join-btn:active { transform: scale(0.93); box-shadow: 0 2px 6px rgba(37,99,235,0.3); }
+
+      /* ── PAGE INDICATOR DOTS ─────────────────────────── */
+      .mb-dots {
+        display: flex; justify-content: center; gap: 6px;
+        padding: 14px 0 4px; flex-shrink: 0;
+      }
+      .mb-dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--border2); transition: all 0.25s;
+      }
+      .mb-dot.on { background: var(--accent); width: 20px; border-radius: 3px; }
+
+    } /* end @media 480px */
+
+    /* ═══════════════════════════════════════════════════════
+       NEW FEATURE STYLES
+       ═══════════════════════════════════════════════════════ */
+
+    /* ── PARTICLES CANVAS ──────────────────────────────── */
+    #particles-canvas {
+      position: absolute; inset: 0; z-index: 0;
+      pointer-events: none; opacity: 0.45;
+    }
+
+    /* ── TRUSTED BY ────────────────────────────────────── */
+    .trusted-section {
+      background: var(--surface); padding: 28px 24px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .trusted-inner {
+      max-width: 1080px; margin: 0 auto;
+      display: flex; align-items: center; gap: 32px;
+      flex-wrap: wrap;
+    }
+    .trusted-label {
+      font-size: 11.5px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted2); white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .trusted-logos {
+      display: flex; align-items: center; gap: 24px;
+      flex-wrap: wrap; flex: 1;
+    }
+    .trusted-logo {
+      font-family: 'Sora', sans-serif;
+      font-size: 13.5px; font-weight: 700; color: var(--muted);
+      letter-spacing: -0.02em; transition: color 0.2s;
+      white-space: nowrap; user-select: none;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .trusted-logo:hover { color: var(--text); }
+    .trusted-logo svg { opacity: 0.5; }
+    @media (max-width: 640px) {
+      .trusted-inner { gap: 16px; }
+      .trusted-logos { gap: 16px; }
+      .trusted-logo { font-size: 12.5px; }
+    }
+
+    /* ── COMPARISON TABLE ──────────────────────────────── */
+    #compare { background: var(--bg); }
+    .compare-table-wrap { overflow-x: auto; margin-top: 52px; -webkit-overflow-scrolling: touch; }
+    .compare-table {
+      width: 100%; border-collapse: separate; border-spacing: 0;
+      min-width: 640px; border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .compare-table th {
+      padding: 16px 20px; background: var(--surface2);
+      font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700;
+      text-align: center; color: var(--text2); border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .compare-table th:first-child { text-align: left; }
+    .compare-table th.col-highlight {
+      background: var(--accent); color: #fff;
+    }
+    .compare-table td {
+      padding: 14px 20px; font-size: 13.5px; color: var(--muted);
+      border-bottom: 1px solid var(--border); text-align: center;
+    }
+    .compare-table td:first-child { text-align: left; color: var(--text2); font-weight: 500; }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table td.col-highlight {
+      background: rgba(37,99,235,0.06); color: var(--text);
+    }
+    .compare-table tr:hover td { background: var(--surface2); }
+    .compare-table tr:hover td.col-highlight { background: rgba(37,99,235,0.1); }
+    .compare-check { color: var(--green); font-size: 16px; font-weight: 700; }
+    .compare-cross  { color: var(--muted2); font-size: 16px; }
+    .compare-partial { color: var(--orange); font-size: 13px; font-weight: 500; }
+    .compare-badge-col {
+      background: var(--accent); color: #fff;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      padding: 3px 8px; border-radius: 6px; display: inline-block;
+    }
+    @media (max-width: 640px) {
+      .compare-table th, .compare-table td { padding: 12px 14px; font-size: 12.5px; }
+    }
+
+    /* ── PRICING TOGGLE ────────────────────────────────── */
+    .pricing-toggle-wrap {
+      display: flex; align-items: center; justify-content: center;
+      gap: 16px; margin: 28px auto 0;
+    }
+    .pricing-toggle-label {
+      font-size: 14px; font-weight: 500; color: var(--muted);
+      transition: color 0.2s;
+    }
+    .pricing-toggle-label.active { color: var(--text); font-weight: 600; }
+    .billing-toggle {
+      position: relative; width: 48px; height: 26px;
+      background: var(--surface3); border-radius: 13px;
+      border: 1px solid var(--border2); cursor: pointer;
+      transition: background 0.25s; flex-shrink: 0;
+    }
+    .billing-toggle.annual { background: var(--accent); border-color: var(--accent); }
+    .billing-toggle::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; border-radius: 50%; background: #fff;
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+    .billing-toggle.annual::after { transform: translateX(22px); }
+    .billing-save-badge {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+      background: rgba(34,197,94,0.15); color: var(--green);
+      border: 1px solid rgba(34,197,94,0.3); border-radius: 6px;
+      padding: 3px 8px; transition: opacity 0.3s, transform 0.3s;
+    }
+    .billing-save-badge.hidden { opacity: 0; pointer-events: none; transform: scale(0.85); }
+
+    /* Strikethrough on old price */
+    .price-amount .old-price {
+      font-size: 16px; font-weight: 400; color: var(--muted2);
+      text-decoration: line-through; margin-right: 4px;
+      display: none;
+    }
+    .pricing-annual .price-amount .old-price { display: inline; }
+
+    /* ── FAQ SECTION ───────────────────────────────────── */
+    #faq { background: var(--surface); }
+    .faq-list { margin-top: 48px; display: flex; flex-direction: column; gap: 0; max-width: 760px; margin-left: auto; margin-right: auto; }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+    .faq-question {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 20px 0; cursor: pointer;
+      font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600;
+      color: var(--text); letter-spacing: -0.02em;
+      transition: color 0.2s; user-select: none;
+      background: none; border: none; width: 100%; text-align: left;
+    }
+    .faq-question:hover { color: var(--accent); }
+    .faq-question.open { color: var(--accent); }
+    .faq-icon {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1px solid var(--border2); background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: transform 0.3s, background 0.2s, border-color 0.2s;
+      color: var(--muted);
+    }
+    .faq-question.open .faq-icon {
+      transform: rotate(45deg);
+      background: rgba(37,99,235,0.12); border-color: rgba(37,99,235,0.3);
+      color: var(--accent);
+    }
+    .faq-answer {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.25,0.46,0.45,0.94),
+                  padding 0.3s;
+      font-size: 14.5px; color: var(--muted); line-height: 1.7;
+    }
+    .faq-answer.open { max-height: 400px; padding-bottom: 20px; }
+    .faq-answer p { margin-bottom: 8px; }
+    .faq-answer p:last-child { margin-bottom: 0; }
+    .faq-answer a { color: var(--accent); text-decoration: none; }
+    .faq-answer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .faq-question { font-size: 15px; padding: 16px 0; }
+      .faq-answer { font-size: 14px; }
+    }
+
+    /* ── TOAST NOTIFICATIONS ────────────────────────────── */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9990;
+      display: flex; flex-direction: column; gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 18px; border-radius: 14px;
+      background: var(--surface); border: 1px solid var(--border2);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      font-size: 13.5px; color: var(--text2); max-width: 320px;
+      pointer-events: all;
+      transform: translateX(110%); opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+    }
+    .toast.show { transform: translateX(0); opacity: 1; }
+    .toast.hide { transform: translateX(110%); opacity: 0; transition-duration: 0.3s; }
+    .toast-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .toast-icon.success { background: rgba(34,197,94,0.15); color: var(--green); }
+    .toast-icon.error   { background: rgba(248,113,113,0.15); color: var(--red); }
+    .toast-icon.info    { background: rgba(37,99,235,0.12);  color: var(--accent); }
+    .toast-body { flex: 1; }
+    .toast-title { font-weight: 600; color: var(--text); font-size: 13.5px; margin-bottom: 2px; }
+    .toast-msg { font-size: 12.5px; color: var(--muted); }
+    .toast-close {
+      flex-shrink: 0; background: none; border: none; color: var(--muted2);
+      cursor: pointer; padding: 0; line-height: 1; font-size: 16px;
+      transition: color 0.15s; align-self: flex-start;
+    }
+    .toast-close:hover { color: var(--text); }
+    @media (max-width: 640px) {
+      #toast-container { bottom: 90px; right: 16px; left: 16px; }
+      .toast { max-width: 100%; }
+    }
+
+    /* ── BACK TO TOP BUTTON ─────────────────────────────── */
+    #back-to-top {
+      position: fixed; bottom: 24px; left: 24px; z-index: 190;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--border2);
+      color: var(--muted); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      opacity: 0; pointer-events: none; transform: translateY(12px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    #back-to-top.visible { opacity: 1; pointer-events: all; transform: translateY(0); }
+    #back-to-top:hover { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 6px 24px var(--accent-glow); }
+    @media (max-width: 640px) { #back-to-top { display: none; } }
+
+    /* ── STATS HIGHLIGHT SECTION ────────────────────────── */
+    #stats-highlight {
+      background: var(--surface); padding: 80px 24px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stats-hl-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+      background: var(--border); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; margin-top: 0;
+    }
+    .stat-hl-card {
+      background: var(--surface2); padding: 32px 28px; text-align: center;
+      transition: background 0.2s;
+    }
+    .stat-hl-card:hover { background: var(--surface3); }
+    .stat-hl-num {
+      font-family: 'Sora', sans-serif; font-size: 40px; font-weight: 800;
+      letter-spacing: -0.05em; color: var(--text); line-height: 1;
+    }
+    .stat-hl-label { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+    .stat-hl-icon { margin-bottom: 14px; color: var(--accent); display: flex; justify-content: center; }
+    @media (max-width: 768px) {
+      .stats-hl-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      #stats-highlight { display: none; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="scroll-progress"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Toast container -->
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- Back to top -->
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" title="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- Mobile Floating CTA -->
+<button class="mobile-fab ripple-container" onclick="openModal('register')">🚀 Get Started Free</button>
+
+<!-- ── NAV ──────────────────────────────────────────────────── -->
+<nav class="nav" id="mainNav">
+  <a href="#" class="nav-logo">Biz<span>Boost</span></a>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#compare">Why BizBoost</a></li>
+    <li><a href="#proof">Stories</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-right" id="navCta">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle dark/light mode">
+      <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+    <button class="btn-ghost" onclick="openModal('login')">Sign In</button>
+    <button class="btn-accent" onclick="openModal('register')">Get Started Free</button>
+  </div>
+  <!-- Mobile: only burger -->
+  <button class="nav-burger" id="burgerBtn" onclick="toggleMobile()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ── MOBILE FULL-SCREEN MENU ──────────────────────────────── -->
+<div class="nav-mobile-menu" id="mobileMenu">
+  <!-- Top bar inside menu -->
+  <div class="mob-menu-top">
+    <span class="nav-logo" style="font-size:20px">Biz<span style="color:var(--accent)">Boost</span></span>
+    <button class="mob-menu-close" onclick="toggleMobile()" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- Nav links -->
+  <nav class="mob-nav-links">
+    <a href="#how"      onclick="toggleMobile()"><span class="mob-link-num">01</span>How it works</a>
+    <a href="#features" onclick="toggleMobile()"><span class="mob-link-num">02</span>Features</a>
+    <a href="#compare"  onclick="toggleMobile()"><span class="mob-link-num">03</span>Why BizBoost</a>
+    <a href="#proof"    onclick="toggleMobile()"><span class="mob-link-num">04</span>Stories</a>
+    <a href="#pricing"  onclick="toggleMobile()"><span class="mob-link-num">05</span>Pricing</a>
+    <a href="#faq"      onclick="toggleMobile()"><span class="mob-link-num">06</span>FAQ</a>
+  </nav>
+
+  <!-- Auth actions -->
+  <div class="mob-menu-actions">
+    <button class="mob-signin-btn" onclick="openModal('login');toggleMobile()">Sign In</button>
+    <button class="mob-start-btn ripple-container" onclick="openModal('register');toggleMobile()">
+      Get Started Free
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+  </div>
+
+  <!-- Footer inside menu -->
+  <div class="mob-menu-footer">
+    <button class="mob-theme-btn" onclick="toggleTheme()">
+      <svg class="icon-sun" width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg class="icon-moon" width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <span id="mob-theme-label">Switch to Light</span>
+    </button>
+    <p class="mob-menu-tagline">AI tools for India's local businesses</p>
+  </div>
+</div>
+
+<!-- ── HERO ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <canvas id="particles-canvas" aria-hidden="true"></canvas>
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    <span><strong>2,400+</strong> local businesses growing with BizBoost</span>
+  </div>
+
+  <div class="typing-wrapper">
+    <div class="typing-tag">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      AI is analysing <span id="typingText"></span>
+    </div>
+  </div>
+
+  <h1 class="hero-h1">
+    Grow your local business<br>
+    <span class="line2">with AI precision</span>
+  </h1>
+  <p class="hero-sub">
+    BizBoost finds real local competitors, generates targeted AI plans, and connects you with buyers — all in minutes.
+  </p>
+
+  <!-- Buyer Search -->
+  <div class="buyer-bar">
+    <input type="text" id="buyerProduct" placeholder="What are you looking for?" autocomplete="off" />
+    <div class="buyer-divider"></div>
+    <input type="text" id="buyerCity" placeholder="City (optional)" autocomplete="off" />
+    <button class="buyer-bar-btn" onclick="doBuyerSearch()">Search →</button>
+  </div>
+  <div class="hero-chips">
+    <span class="hero-chip" onclick="fillBuyerSearch('Printed T-Shirts')">Printed T-Shirts</span>
+    <span class="hero-chip" onclick="fillBuyerSearch('Mobile Accessories')">Mobile Accessories</span>
+    <span class="hero-chip" onclick="fillBuyerSearch('Kurtis & Ethnic Wear')">Kurtis & Ethnic Wear</span>
+    <span class="hero-chip" onclick="fillBuyerSearch('Hardware Tools')">Hardware Tools</span>
+    <span class="hero-chip" onclick="fillBuyerSearch('Organic Spices')">Organic Spices</span>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num">2,400+</div>
+      <div class="hero-stat-label">Active Sellers</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">₹4.2Cr+</div>
+      <div class="hero-stat-label">Revenue Generated</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">18,000+</div>
+      <div class="hero-stat-label">Buyer Connections</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">94%</div>
+      <div class="hero-stat-label">Satisfaction Rate</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TRUSTED BY ─────────────────────────────────────────────── -->
+<div class="trusted-section">
+  <div class="trusted-inner">
+    <span class="trusted-label">Integrated with</span>
+    <div class="trusted-logos">
+      <span class="trusted-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        IndiaMART
+      </span>
+      <span class="trusted-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Google Business
+      </span>
+      <span class="trusted-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Razorpay
+      </span>
+      <span class="trusted-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Shopify
+      </span>
+      <span class="trusted-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        WhatsApp Business
+      </span>
+      <span class="trusted-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        JustDial
+      </span>
+      <span class="trusted-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        TradeIndia
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ──────────────────────────────────────────── -->
+<section id="how">
+  <div class="container">
+    <div class="text-center reveal">
+      <span class="section-label">Process</span>
+      <h2 class="section-h2">Up and running in 5 minutes</h2>
+      <p class="section-sub">No tech skills needed. Register your business and let AI do the heavy lifting.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-num">STEP 01</div>
+        <div class="step-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <h3 class="step-h">Register your business</h3>
+        <p class="step-p">Enter your business name, category, and city. Takes under 2 minutes. No credit card required.</p>
+      </div>
+      <div class="step-card reveal" style="transition-delay:0.1s">
+        <div class="step-num">STEP 02</div>
+        <div class="step-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+        <h3 class="step-h">AI analyses your market</h3>
+        <p class="step-p">Our AI scans local competitors, identifies pricing gaps, and builds a custom growth strategy for your business.</p>
+      </div>
+      <div class="step-card reveal" style="transition-delay:0.2s">
+        <div class="step-num">STEP 03</div>
+        <div class="step-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <h3 class="step-h">Execute and grow</h3>
+        <p class="step-p">Receive buyer leads, keyword rankings, and step-by-step actions. Track results from your dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ──────────────────────────────────────────────── -->
+<section id="features">
+  <div class="container">
+    <div class="reveal text-center">
+      <span class="section-label">Features</span>
+      <h2 class="section-h2">Everything local businesses need</h2>
+      <p class="section-sub" style="margin:14px auto 0">Built for Indian SMEs — not Fortune 500 companies.</p>
+    </div>
+    <div class="features-grid" style="margin-top:52px">
+
+      <!-- Row 1 -->
+      <div class="feat-card reveal">
+        <div class="feat-icon fi-blue">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h3 class="feat-h">Hyper-local competitor tracking</h3>
+        <p class="feat-p">Find actual competitors on your street, not giant e-commerce players. Real intel for your real market.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">Real-time</span>
+          <span class="feat-tag">Street-level</span>
+        </div>
+      </div>
+
+      <div class="feat-card reveal" style="transition-delay:0.07s">
+        <div class="feat-icon fi-green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <h3 class="feat-h">SEO keyword engine</h3>
+        <p class="feat-p">Discover exactly what your local customers search for. Get on Google's first page for terms that convert.</p>
+        <div class="feat-tags">
+          <span class="feat-tag" style="background:rgba(34,197,94,0.1);color:var(--green)">Local SEO</span>
+          <span class="feat-tag" style="background:rgba(34,197,94,0.1);color:var(--green)">GMB Optimize</span>
+        </div>
+      </div>
+
+      <div class="feat-card reveal" style="transition-delay:0.14s">
+        <div class="feat-icon fi-purple">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3 class="feat-h">B2B & B2C buyer leads</h3>
+        <p class="feat-p">Retailers, wholesalers, and end consumers looking for your products get connected to you directly.</p>
+        <div class="feat-tags">
+          <span class="feat-tag" style="background:rgba(167,139,250,0.1);color:var(--purple)">Verified Buyers</span>
+          <span class="feat-tag" style="background:rgba(167,139,250,0.1);color:var(--purple)">Bulk Orders</span>
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="feat-card reveal" style="transition-delay:0.1s">
+        <div class="feat-icon fi-orange">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+        </div>
+        <h3 class="feat-h">AI Growth Playbook</h3>
+        <p class="feat-p">Personalised, step-by-step action plans — pricing strategy, marketing channels, seasonal tactics. Refreshed every month.</p>
+        <div class="feat-tags">
+          <span class="feat-tag" style="background:rgba(245,158,11,0.1);color:var(--orange)">Personalised AI</span>
+          <span class="feat-tag" style="background:rgba(245,158,11,0.1);color:var(--orange)">Monthly Updates</span>
+        </div>
+      </div>
+
+      <div class="feat-card reveal" style="transition-delay:0.17s">
+        <div class="feat-icon fi-red">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <h3 class="feat-h">Live analytics dashboard</h3>
+        <p class="feat-p">Track visitor leads, keyword rankings, and buyer enquiries in real time. Know exactly what's working.</p>
+        <div class="feat-tags">
+          <span class="feat-tag" style="background:rgba(248,113,113,0.1);color:var(--red)">Real-time</span>
+          <span class="feat-tag" style="background:rgba(248,113,113,0.1);color:var(--red)">ROI Tracking</span>
+        </div>
+      </div>
+
+      <div class="feat-card reveal" style="transition-delay:0.24s">
+        <div class="feat-icon fi-cyan">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3 class="feat-h">WhatsApp & social sync</h3>
+        <p class="feat-p">Get buyer enquiries directly on WhatsApp. Auto-post your deals to Instagram and Facebook with one click.</p>
+        <div class="feat-tags">
+          <span class="feat-tag" style="background:rgba(6,182,212,0.1);color:#06B6D4">WhatsApp</span>
+          <span class="feat-tag" style="background:rgba(6,182,212,0.1);color:#06B6D4">Social Media</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ──────────────────────────────────────────── -->
+<section id="proof">
+  <div class="container text-center reveal">
+    <span class="section-label">Social Proof</span>
+    <h2 class="section-h2">Real results, real businesses</h2>
+    <p class="section-sub">From Surat to Hyderabad — thousands of local sellers trust BizBoost.</p>
+  </div>
+  <div class="proof-track-wrap">
+    <div class="proof-track" id="proofTrack"></div>
+  </div>
+</section>
+
+<!-- ── STATS HIGHLIGHT ───────────────────────────────────────── -->
+<section id="stats-highlight">
+  <div class="container">
+    <div class="stats-hl-grid reveal">
+      <div class="stat-hl-card">
+        <div class="stat-hl-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="stat-hl-num" data-count="2400" data-suffix="+">2,400+</div>
+        <div class="stat-hl-label">Active Sellers across India</div>
+      </div>
+      <div class="stat-hl-card">
+        <div class="stat-hl-icon" style="color:var(--green)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="stat-hl-num" data-count-text="₹4.2Cr+">₹4.2Cr+</div>
+        <div class="stat-hl-label">Revenue Generated for sellers</div>
+      </div>
+      <div class="stat-hl-card">
+        <div class="stat-hl-icon" style="color:var(--purple)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="stat-hl-num" data-count="18000" data-suffix="+">18,000+</div>
+        <div class="stat-hl-label">Buyer connections made</div>
+      </div>
+      <div class="stat-hl-card">
+        <div class="stat-hl-icon" style="color:var(--orange)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="stat-hl-num" data-count="94" data-suffix="%">94%</div>
+        <div class="stat-hl-label">Customer satisfaction rate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMPARISON ────────────────────────────────────────────── -->
+<section id="compare">
+  <div class="container">
+    <div class="text-center reveal">
+      <span class="section-label">Why BizBoost</span>
+      <h2 class="section-h2">Better than the alternatives</h2>
+      <p class="section-sub">See how BizBoost stacks up against traditional methods and generic tools.</p>
+    </div>
+    <div class="compare-table-wrap reveal">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="width:34%">Feature</th>
+            <th class="col-highlight">BizBoost <span class="compare-badge-col">✓ Best</span></th>
+            <th>Traditional Agency</th>
+            <th>Paid Google Ads</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Local competitor analysis</td>
+            <td class="col-highlight"><span class="compare-check">✓</span> AI-powered, street-level</td>
+            <td><span class="compare-partial">Partial</span> Manual guesswork</td>
+            <td><span class="compare-cross">✗</span> Not included</td>
+          </tr>
+          <tr>
+            <td>Hyper-local SEO keywords</td>
+            <td class="col-highlight"><span class="compare-check">✓</span> Auto-generated</td>
+            <td><span class="compare-partial">Partial</span> Generic keywords</td>
+            <td><span class="compare-partial">Paid only</span></td>
+          </tr>
+          <tr>
+            <td>B2B buyer lead generation</td>
+            <td class="col-highlight"><span class="compare-check">✓</span> Verified buyer network</td>
+            <td><span class="compare-cross">✗</span> Out of scope</td>
+            <td><span class="compare-cross">✗</span> Not included</td>
+          </tr>
+          <tr>
+            <td>Monthly cost (avg)</td>
+            <td class="col-highlight"><span class="compare-check">₹499/mo</span></td>
+            <td><span class="compare-cross">₹5,000–₹30,000/mo</span></td>
+            <td><span class="compare-cross">₹10,000+ ad spend</span></td>
+          </tr>
+          <tr>
+            <td>Time to first result</td>
+            <td class="col-highlight"><span class="compare-check">✓</span> 2–4 weeks</td>
+            <td><span class="compare-cross">3–6 months</span></td>
+            <td><span class="compare-partial">Immediate but expensive</span></td>
+          </tr>
+          <tr>
+            <td>AI growth playbook</td>
+            <td class="col-highlight"><span class="compare-check">✓</span> Personalised monthly</td>
+            <td><span class="compare-partial">Partial</span> Generic plan</td>
+            <td><span class="compare-cross">✗</span> Not included</td>
+          </tr>
+          <tr>
+            <td>No tech skills required</td>
+            <td class="col-highlight"><span class="compare-check">✓</span> 5-minute setup</td>
+            <td><span class="compare-check">✓</span> Agency handles it</td>
+            <td><span class="compare-cross">✗</span> Requires expertise</td>
+          </tr>
+          <tr>
+            <td>WhatsApp lead alerts</td>
+            <td class="col-highlight"><span class="compare-check">✓</span> Instant notifications</td>
+            <td><span class="compare-cross">✗</span> Not included</td>
+            <td><span class="compare-cross">✗</span> Not included</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<section id="pricing">
+  <div class="container">
+    <div class="text-center reveal">
+      <span class="section-label">Pricing</span>
+      <h2 class="section-h2">Simple, honest pricing</h2>
+      <p class="section-sub">No hidden fees. Cancel anytime.</p>
+    </div>
+    <!-- Billing toggle -->
+    <div class="pricing-toggle-wrap reveal">
+      <span class="pricing-toggle-label active" id="lblMonthly">Monthly</span>
+      <div class="billing-toggle" id="billingToggle" onclick="toggleBilling()" role="switch" aria-checked="false" tabindex="0"></div>
+      <span class="pricing-toggle-label" id="lblAnnual">Annual</span>
+      <span class="billing-save-badge hidden" id="saveBadge">Save 20%</span>
+    </div>
+    <div class="pricing-grid" id="pricingGrid">
+      <div class="price-card reveal">
+        <div class="price-label">Starter</div>
+        <div class="price-amount"><sup>₹</sup>0<span>/mo</span></div>
+        <p class="price-desc">Perfect to explore and get your first buyer leads.</p>
+        <div class="price-div"></div>
+        <ul class="price-features">
+          <li>1 AI competitor analysis</li>
+          <li>5 keyword recommendations</li>
+          <li>Basic buyer listing</li>
+          <li>Community support</li>
+        </ul>
+        <button class="price-cta" onclick="openModal('register')">Start Free</button>
+      </div>
+      <div class="price-card featured reveal" style="transition-delay:0.1s" data-monthly="499" data-annual="399">
+        <div class="price-label">Growth</div>
+        <div class="price-amount"><span class="old-price">₹499</span><sup>₹</sup><span class="price-val">499</span><span class="price-period">/mo</span></div>
+        <p class="price-desc">For serious sellers ready to dominate their local market.</p>
+        <div class="price-div"></div>
+        <ul class="price-features">
+          <li>Unlimited competitor tracking</li>
+          <li>Full AI Growth Playbook</li>
+          <li>Priority buyer matching</li>
+          <li>GMB & SEO optimization</li>
+          <li>Monthly strategy refresh</li>
+          <li>Email + chat support</li>
+        </ul>
+        <button class="price-cta" onclick="openModal('register')">Start 14-day Trial →</button>
+      </div>
+      <div class="price-card reveal" style="transition-delay:0.2s" data-monthly="1299" data-annual="1039">
+        <div class="price-label">Pro</div>
+        <div class="price-amount"><span class="old-price">₹1,299</span><sup>₹</sup><span class="price-val">1,299</span><span class="price-period">/mo</span></div>
+        <p class="price-desc">For wholesalers, distributors, and multi-category sellers.</p>
+        <div class="price-div"></div>
+        <ul class="price-features">
+          <li>Everything in Growth</li>
+          <li>Multi-city market intel</li>
+          <li>B2B buyer pipeline</li>
+          <li>Ad campaign guidance</li>
+          <li>Dedicated account manager</li>
+          <li>API access</li>
+        </ul>
+        <button class="price-cta" onclick="openModal('register')">Contact Sales</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ────────────────────────────────────────────────────── -->
+<section id="faq">
+  <div class="container">
+    <div class="text-center reveal">
+      <span class="section-label">FAQ</span>
+      <h2 class="section-h2">Common questions answered</h2>
+      <p class="section-sub">Everything you need to know about BizBoost.</p>
+    </div>
+    <div class="faq-list reveal">
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+          What exactly is BizBoost and who is it for?
+          <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-answer">
+          <p>BizBoost is an AI-powered growth platform built specifically for Indian local businesses — whether you run a clothing store, hardware shop, food stall, or any other SME. It helps you find your real local competitors, get hyper-local SEO keywords, receive buyer leads, and follow a personalised AI growth plan — all without any technical skills.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+          How does the AI competitor analysis work?
+          <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-answer">
+          <p>When you register your business with your category and city, our AI scans local business directories, Google Maps data, and search engines to identify businesses selling similar products or services within your area. It doesn't show you Amazon or Flipkart — it finds the actual shops and sellers in your neighbourhood.</p>
+          <p>The analysis is refreshed monthly so your intelligence stays current as the market evolves.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+          Is BizBoost suitable for offline/physical businesses?
+          <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-answer">
+          <p>Absolutely — BizBoost was designed with offline businesses in mind. Whether you have a physical store, a home-based business, or a wholesale operation, the platform helps you get found online by local customers and connect with buyers who are looking for exactly what you sell.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+          Which cities are currently supported?
+          <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-answer">
+          <p>BizBoost currently has strong coverage across 200+ Indian cities including Surat, Mumbai, Delhi, Hyderabad, Bengaluru, Pune, Jaipur, Nagpur, Lucknow, Vadodara, Ahmedabad, and many more tier-2 and tier-3 cities. If your city isn't listed, you can still register — we'll prioritise adding coverage based on demand.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+          How long before I start seeing results?
+          <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-answer">
+          <p>Most sellers see their first buyer enquiries within the first week. For SEO improvements (Google ranking), typical results appear within 2–4 weeks of implementing our keyword recommendations. The AI Growth Playbook provides an ongoing roadmap — the more you implement, the faster you grow.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+          Can I cancel my subscription anytime?
+          <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-answer">
+          <p>Yes — there are no lock-in contracts. You can cancel, upgrade, or downgrade your plan at any time from your dashboard. If you cancel a paid plan, you'll continue to have access until the end of your current billing period, then automatically move to the free Starter plan.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+          Do I need any technical skills or a website?
+          <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-answer">
+          <p>No technical skills or website required. BizBoost works with your existing Google Business Profile, or even without one. The setup takes under 5 minutes — just enter your business name, category, and city. Our AI does the rest.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────────── -->
+<section id="cta">
+  <div class="container">
+    <div class="cta-box reveal">
+      <span class="section-label">Get Started</span>
+      <h2 class="section-h2">Ready to outgrow your competition?</h2>
+      <p class="section-sub">Join 2,400+ local businesses already using BizBoost to win their market.</p>
+      <div class="cta-email-row">
+        <input type="email" id="ctaEmail" placeholder="Enter your email" />
+        <button class="btn-accent" onclick="ctaSignup()">Get Started Free</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted2);margin-top:12px">No credit card required · Free forever plan available</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MOBILE APP SHELL  (visible only on ≤480px, replaces whole page)
+     ═══════════════════════════════════════════════════════════ -->
+<div id="mob-app">
+
+  <!-- TOP BAR -->
+  <header class="mb-top">
+    <a class="mb-logo" href="#">Biz<span>Boost</span></a>
+    <div class="mb-top-r">
+      <button class="mb-theme" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg class="ic-sun" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="ic-moon" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="mb-signin" onclick="openModal('login')">Sign In</button>
+    </div>
+  </header>
+
+  <!-- PAGES — native CSS scroll-snap (no JS animation, butter smooth) -->
+  <div class="mb-pages" id="mbPages">
+
+    <!-- PAGE 1 · HOME ───────────────────────────────────── -->
+    <section class="mb-page" id="mp-home">
+      <div class="mb-pi">
+
+        <div class="mb-badge">
+          <span class="mb-badge-dot"></span>
+          <strong>2,400+</strong> businesses growing with BizBoost
+        </div>
+
+        <h1 class="mb-h1">
+          Grow your<br>
+          <span class="mb-grad">local business</span><br>
+          with AI precision
+        </h1>
+
+        <div class="mb-search">
+          <span class="mb-search-ic">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input class="mb-search-inp" id="mbSearchInp" type="text" placeholder="Search products or services…" autocomplete="off"/>
+          <button class="mb-search-btn" onclick="mbSearch()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+
+        <div class="mb-chips">
+          <button class="mb-chip" onclick="mbChip('Kurtis')">👗 Kurtis</button>
+          <button class="mb-chip" onclick="mbChip('Mobile Accessories')">📱 Mobiles</button>
+          <button class="mb-chip" onclick="mbChip('Organic Spices')">🌿 Spices</button>
+          <button class="mb-chip" onclick="mbChip('Hardware Tools')">🔧 Tools</button>
+          <button class="mb-chip" onclick="mbChip('Printed T-Shirts')">👕 T-Shirts</button>
+        </div>
+
+        <div class="mb-stats">
+          <div class="mb-stat">
+            <div class="mb-stat-n" data-cnt="2400" data-sfx="+">0</div>
+            <div class="mb-stat-l">Active Sellers</div>
+          </div>
+          <div class="mb-stat">
+            <div class="mb-stat-n" data-cnt-text="₹4.2Cr+">₹0</div>
+            <div class="mb-stat-l">Revenue Generated</div>
+          </div>
+          <div class="mb-stat">
+            <div class="mb-stat-n" data-cnt="18000" data-sfx="+">0</div>
+            <div class="mb-stat-l">Buyer Connections</div>
+          </div>
+          <div class="mb-stat">
+            <div class="mb-stat-n" data-cnt="94" data-sfx="%">0%</div>
+            <div class="mb-stat-l">Satisfaction Rate</div>
+          </div>
+        </div>
+
+        <button class="mb-cta" onclick="openModal('register')">
+          Start for Free — No Credit Card
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- PAGE 2 · HOW IT WORKS ───────────────────────────── -->
+    <section class="mb-page" id="mp-how">
+      <div class="mb-pi">
+        <div class="mb-sec-hd">
+          <span class="mb-label">Process</span>
+          <h2 class="mb-h2">Up in <span class="mb-grad">5 minutes</span></h2>
+          <p class="mb-sub">No tech skills needed. Register and let AI do the rest.</p>
+        </div>
+
+        <div class="mb-steps">
+          <div class="mb-step-card">
+            <div class="mb-step-ic blue">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div class="mb-step-body">
+              <div class="mb-step-num">STEP 01</div>
+              <div class="mb-step-h">Register your business</div>
+              <p class="mb-step-p">Enter your business name, category, and city. Takes under 2 minutes. No credit card required.</p>
+            </div>
+          </div>
+          <div class="mb-step-card">
+            <div class="mb-step-ic purple">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            </div>
+            <div class="mb-step-body">
+              <div class="mb-step-num">STEP 02</div>
+              <div class="mb-step-h">AI analyses your market</div>
+              <p class="mb-step-p">Our AI scans local competitors, identifies pricing gaps, and builds a custom growth strategy for your category.</p>
+            </div>
+          </div>
+          <div class="mb-step-card">
+            <div class="mb-step-ic green">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="mb-step-body">
+              <div class="mb-step-num">STEP 03</div>
+              <div class="mb-step-h">Execute and grow</div>
+              <p class="mb-step-p">Receive buyer leads, keyword rankings, and step-by-step actions. Track results live from your dashboard.</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="mb-cta mb-cta-push" onclick="openModal('register')">
+          Get Started Free →
+        </button>
+      </div>
+    </section>
+
+    <!-- PAGE 3 · FEATURES ──────────────────────────────── -->
+    <section class="mb-page" id="mp-features">
+      <div class="mb-pi">
+        <div class="mb-sec-hd">
+          <span class="mb-label">Features</span>
+          <h2 class="mb-h2">Everything you <span class="mb-grad">need</span></h2>
+          <p class="mb-sub">Tools built specifically for Indian local businesses.</p>
+        </div>
+
+        <div class="mb-feats">
+
+          <div class="mb-feat-card" style="--card-color:#2563EB">
+            <div class="mb-feat-ic" style="background:rgba(37,99,235,0.12);border-color:rgba(37,99,235,0.25)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="mb-feat-body">
+              <div class="mb-feat-h">Hyper-local competitor tracking</div>
+              <p class="mb-feat-p">Find actual competitors on your street — not giant e-commerce players.</p>
+              <div class="mb-feat-tags">
+                <span class="mb-feat-tag" style="background:rgba(37,99,235,0.1);color:#2563EB">Real-time</span>
+                <span class="mb-feat-tag" style="background:rgba(37,99,235,0.1);color:#2563EB">Street-level</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-feat-card" style="--card-color:#22C55E">
+            <div class="mb-feat-ic" style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.25)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.8" stroke-linecap="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="mb-feat-body">
+              <div class="mb-feat-h">SEO keyword engine</div>
+              <p class="mb-feat-p">Discover what your local customers search for. Rank on Google's first page.</p>
+              <div class="mb-feat-tags">
+                <span class="mb-feat-tag" style="background:rgba(34,197,94,0.1);color:#22C55E">Local SEO</span>
+                <span class="mb-feat-tag" style="background:rgba(34,197,94,0.1);color:#22C55E">GMB</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-feat-card" style="--card-color:#A78BFA">
+            <div class="mb-feat-ic" style="background:rgba(167,139,250,0.12);border-color:rgba(167,139,250,0.25)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="mb-feat-body">
+              <div class="mb-feat-h">B2B & B2C buyer leads</div>
+              <p class="mb-feat-p">Retailers, wholesalers, and end consumers looking for your products get connected to you directly.</p>
+              <div class="mb-feat-tags">
+                <span class="mb-feat-tag" style="background:rgba(167,139,250,0.1);color:#A78BFA">Verified</span>
+                <span class="mb-feat-tag" style="background:rgba(167,139,250,0.1);color:#A78BFA">Bulk Orders</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-feat-card" style="--card-color:#F59E0B">
+            <div class="mb-feat-ic" style="background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.25)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+            </div>
+            <div class="mb-feat-body">
+              <div class="mb-feat-h">AI Growth Playbook</div>
+              <p class="mb-feat-p">Personalised step-by-step action plan — pricing, marketing channels, seasonal tactics. Updated monthly.</p>
+              <div class="mb-feat-tags">
+                <span class="mb-feat-tag" style="background:rgba(245,158,11,0.1);color:#F59E0B">AI-personalised</span>
+                <span class="mb-feat-tag" style="background:rgba(245,158,11,0.1);color:#F59E0B">Monthly</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-feat-card" style="--card-color:#F87171">
+            <div class="mb-feat-ic" style="background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.25)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div class="mb-feat-body">
+              <div class="mb-feat-h">Live analytics dashboard</div>
+              <p class="mb-feat-p">Track visitor leads, keyword rankings, and buyer enquiries in real time.</p>
+              <div class="mb-feat-tags">
+                <span class="mb-feat-tag" style="background:rgba(248,113,113,0.1);color:#F87171">Real-time</span>
+                <span class="mb-feat-tag" style="background:rgba(248,113,113,0.1);color:#F87171">ROI</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-feat-card" style="--card-color:#06B6D4">
+            <div class="mb-feat-ic" style="background:rgba(6,182,212,0.12);border-color:rgba(6,182,212,0.25)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="mb-feat-body">
+              <div class="mb-feat-h">WhatsApp & social sync</div>
+              <p class="mb-feat-p">Get buyer enquiries on WhatsApp. Auto-post deals to Instagram and Facebook with one tap.</p>
+              <div class="mb-feat-tags">
+                <span class="mb-feat-tag" style="background:rgba(6,182,212,0.1);color:#06B6D4">WhatsApp</span>
+                <span class="mb-feat-tag" style="background:rgba(6,182,212,0.1);color:#06B6D4">Social</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 4 · PRICING ───────────────────────────────── -->
+    <section class="mb-page" id="mp-pricing">
+      <div class="mb-pi" id="mbPricingPi">
+        <div class="mb-sec-hd">
+          <span class="mb-label">Pricing</span>
+          <h2 class="mb-h2">Simple, <span class="mb-grad">honest</span> pricing</h2>
+          <p class="mb-sub">No hidden fees. Cancel anytime.</p>
+        </div>
+
+        <!-- Billing toggle -->
+        <div class="mb-bill-toggle" id="mbBillToggle" onclick="mbToggleBill()">
+          <span class="mb-bill-label on" id="mbLblM">Monthly</span>
+          <div class="mb-bill-track" id="mbBillTrack">
+            <div class="mb-bill-knob"></div>
+          </div>
+          <span class="mb-bill-label" id="mbLblA">Annual</span>
+          <span class="mb-bill-save">Save 20%</span>
+        </div>
+
+        <div class="mb-plans" id="mbPlans">
+
+          <!-- Starter -->
+          <div class="mb-plan-card">
+            <div class="mb-plan-name">Starter</div>
+            <div class="mb-plan-price">
+              <sup>₹</sup><span class="mb-pp-val">0</span><span class="mb-pp-per">/mo</span>
+            </div>
+            <p class="mb-plan-desc">Explore and get your first buyer leads.</p>
+            <ul class="mb-plan-ul">
+              <li>1 AI competitor analysis</li>
+              <li>5 keyword recommendations</li>
+              <li>Basic buyer listing</li>
+              <li>Community support</li>
+            </ul>
+            <button class="mb-plan-btn ghost" onclick="openModal('register')">Start Free</button>
+          </div>
+
+          <!-- Growth -->
+          <div class="mb-plan-card featured" data-monthly="499" data-annual="399">
+            <div class="mb-plan-pop">MOST POPULAR</div>
+            <div class="mb-plan-name">Growth</div>
+            <div class="mb-plan-price">
+              <sup>₹</sup><span class="mb-pp-val">499</span><span class="mb-pp-per">/mo</span>
+            </div>
+            <div class="mb-plan-old" id="mbOldGrowth">₹499/mo</div>
+            <p class="mb-plan-desc">Dominate your local market with AI.</p>
+            <ul class="mb-plan-ul">
+              <li>Unlimited competitor tracking</li>
+              <li>Full AI Growth Playbook</li>
+              <li>Priority buyer matching</li>
+              <li>GMB & SEO optimization</li>
+              <li>Monthly strategy refresh</li>
+              <li>Email + chat support</li>
+            </ul>
+            <button class="mb-plan-btn white" onclick="openModal('register')">Start 14-day Trial →</button>
+          </div>
+
+          <!-- Pro -->
+          <div class="mb-plan-card" data-monthly="1299" data-annual="1039">
+            <div class="mb-plan-name">Pro</div>
+            <div class="mb-plan-price">
+              <sup>₹</sup><span class="mb-pp-val">1,299</span><span class="mb-pp-per">/mo</span>
+            </div>
+            <div class="mb-plan-old" id="mbOldPro">₹1,299/mo</div>
+            <p class="mb-plan-desc">For wholesalers and multi-city sellers.</p>
+            <ul class="mb-plan-ul">
+              <li>Everything in Growth</li>
+              <li>Multi-city market intel</li>
+              <li>B2B buyer pipeline</li>
+              <li>Ad campaign guidance</li>
+              <li>Dedicated account manager</li>
+              <li>API access</li>
+            </ul>
+            <button class="mb-plan-btn ghost" onclick="openModal('register')">Contact Sales</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 5 · REVIEWS ───────────────────────────────── -->
+    <section class="mb-page" id="mp-reviews">
+      <div class="mb-pi">
+        <div class="mb-sec-hd">
+          <span class="mb-label">Success Stories</span>
+          <h2 class="mb-h2">Real <span class="mb-grad">results</span></h2>
+          <p class="mb-sub">From Surat to Hyderabad — sellers growing with BizBoost.</p>
+        </div>
+
+        <div class="mb-rev-summary">
+          <div class="mb-rev-big">4.9</div>
+          <div>
+            <div class="mb-rev-stars">★★★★★</div>
+            <div class="mb-rev-count">Based on 2,400+ reviews</div>
+          </div>
+        </div>
+
+        <div class="mb-revs">
+          <div class="mb-rev-card">
+            <div class="mb-rev-s">★★★★★</div>
+            <p class="mb-rev-q">"Found 9 real competitors near my shop. Implemented the AI plan — beat 3 of them in 6 weeks."</p>
+            <div class="mb-rev-auth">
+              <div class="mb-av mb-av1">PM</div>
+              <div><div class="mb-rev-name">Priya Mehta</div><div class="mb-rev-biz">Priya's Kurta House, Surat</div></div>
+            </div>
+          </div>
+          <div class="mb-rev-card">
+            <div class="mb-rev-s">★★★★★</div>
+            <p class="mb-rev-q">"Finally a tool that shows local dealers, not Amazon. My sales went up 40% in 2 months."</p>
+            <div class="mb-rev-auth">
+              <div class="mb-av mb-av2">RS</div>
+              <div><div class="mb-rev-name">Rahul Sharma</div><div class="mb-rev-biz">QuickMobile, Nagpur</div></div>
+            </div>
+          </div>
+          <div class="mb-rev-card">
+            <div class="mb-rev-s">★★★★★</div>
+            <p class="mb-rev-q">"Ranked on first page for 'printed tshirt Vadodara' in 3 weeks. The keyword list was spot on."</p>
+            <div class="mb-rev-auth">
+              <div class="mb-av mb-av3">DP</div>
+              <div><div class="mb-rev-name">Dev Patel</div><div class="mb-rev-biz">PrintZone, Vadodara</div></div>
+            </div>
+          </div>
+          <div class="mb-rev-card">
+            <div class="mb-rev-s">★★★★★</div>
+            <p class="mb-rev-q">"3 buyer leads in first week — one became a ₹85,000 bulk order. Worth every rupee."</p>
+            <div class="mb-rev-auth">
+              <div class="mb-av mb-av4">SA</div>
+              <div><div class="mb-rev-name">Sunita Agarwal</div><div class="mb-rev-biz">Agarwal Textiles, Jaipur</div></div>
+            </div>
+          </div>
+          <div class="mb-rev-card">
+            <div class="mb-rev-s">★★★★★</div>
+            <p class="mb-rev-q">"My Google Business Profile views went up 4× after implementing the SEO fixes. Incredible."</p>
+            <div class="mb-rev-auth">
+              <div class="mb-av mb-av5">AV</div>
+              <div><div class="mb-rev-name">Amit Verma</div><div class="mb-rev-biz">Verma Hardware, Lucknow</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 6 · JOIN ──────────────────────────────────── -->
+    <section class="mb-page" id="mp-join">
+      <div class="mb-pi">
+
+        <div class="mb-testi">
+          <div class="mb-testi-s">★★★★★</div>
+          <p class="mb-testi-q" id="mbTestiQ">"BizBoost helped me rank #1 for 'kurti Surat' in 3 weeks. Revenue doubled."</p>
+          <div class="mb-testi-auth">
+            <div class="mb-av mb-av1" id="mbTestiAv">PR</div>
+            <div>
+              <div class="mb-testi-name" id="mbTestiName">Priya Rathod</div>
+              <div class="mb-testi-biz" id="mbTestiBiz">Priya's Kurta House, Surat</div>
+            </div>
+          </div>
+          <div class="mb-tdots" id="mbTdots">
+            <span class="mb-tdot on"></span>
+            <span class="mb-tdot"></span>
+            <span class="mb-tdot"></span>
+          </div>
+        </div>
+
+        <div class="mb-join-card">
+          <span class="mb-label">Get Started</span>
+          <h2 class="mb-h2 mb-h2-sm">Ready to outgrow<br><span class="mb-grad">your competition?</span></h2>
+          <p class="mb-join-sub">Free forever plan · No credit card · 2-min setup</p>
+          <input class="mb-join-inp" id="mbJoinInp" type="email" placeholder="Enter your email address"/>
+          <button class="mb-cta mb-cta-tight" onclick="mbJoinCta()">
+            Get Started Free →
+          </button>
+          <p class="mb-join-or">Already have an account? <a href="#" onclick="openModal('login');return false">Sign In</a></p>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- /mb-pages -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="mb-nav" id="mbNav">
+    <button class="mb-nb on" data-pi="0" onclick="mbGo(0)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="mb-nb" data-pi="1" onclick="mbGo(1)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>How</span>
+    </button>
+    <button class="mb-nb" data-pi="2" onclick="mbGo(2)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>Features</span>
+    </button>
+    <button class="mb-nb" data-pi="3" onclick="mbGo(3)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Pricing</span>
+    </button>
+    <button class="mb-nb" data-pi="4" onclick="mbGo(4)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>Reviews</span>
+    </button>
+    <button class="mb-nb join-btn" data-pi="5" onclick="mbGo(5)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      <span>Join</span>
+    </button>
+  </nav>
+
+</div><!-- /mob-app -->
+
+<!-- ── FOOTER ────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo">Biz<span>Boost</span></a>
+      <p>AI-powered growth tools for India's local businesses.</p>
+    </div>
+    <div class="footer-links-group">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="seller/dashboard.html">Dashboard</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>For Sellers</h4>
+      <ul>
+        <li><a href="#" onclick="openModal('register');return false">Register Business</a></li>
+        <li><a href="#">Seller Guide</a></li>
+        <li><a href="#">Case Studies</a></li>
+        <li><a href="#">Blog</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 BizBoost. All rights reserved.</p>
+    <p style="display:flex;align-items:center;gap:6px">Crafted with <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--accent)" stroke="none" style="display:inline-block;vertical-align:middle"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> for Indian entrepreneurs</p>
+  </div>
+</footer>
+
+<!-- ── AUTH MODAL ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="authModal" onclick="overlayClose(event)">
+  <div class="modal-box" id="modalBox">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <span class="modal-logo">Biz<span>Boost</span></span>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- ── ROLE TOGGLE ─────────────────────────────────────── -->
+    <div class="role-toggle-wrap">
+      <div class="role-toggle">
+
+        <button class="role-btn" id="roleSellerBtn" onclick="switchRole('seller')">
+          <!-- store/shop icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          I'm a Seller
+          <span class="role-badge seller-badge">Business</span>
+        </button>
+
+        <button class="role-btn" id="roleBuyerBtn" onclick="switchRole('buyer')">
+          <!-- shopping bag icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          I'm a Buyer
+          <span class="role-badge buyer-badge">Find Products</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Context hint (changes with role) -->
+    <p class="role-context" id="roleContext"></p>
+
+    <!-- Action tabs -->
+    <div class="modal-tabs">
+      <button class="modal-tab" id="tabLogin"    onclick="switchTab('login')">Sign In</button>
+      <button class="modal-tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <div class="modal-body">
+      <div id="formErr"     class="form-err"></div>
+      <div id="formSuccess" class="form-success"></div>
+
+      <!-- ════════════════════════════════════
+           SELLER — SIGN IN
+           Calls: /api/seller_login.php
+           ════════════════════════════════════ -->
+      <div id="formSellerLogin">
+        <div class="form-group">
+          <label class="form-label">Business Email</label>
+          <input id="slEmail" class="form-input" type="email" placeholder="you@yourbusiness.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <input id="slPwd" class="form-input" type="password" placeholder="Your password" autocomplete="current-password" />
+            <button class="pwd-toggle" type="button" onclick="togglePwd('slPwd',this)" tabindex="-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button id="slBtn" class="form-submit" onclick="doSellerLogin()">Sign In to Dashboard →</button>
+        <p class="form-footer">New seller? <a href="#" onclick="switchTab('register');return false">Register your business free</a></p>
+      </div>
+
+      <!-- ════════════════════════════════════
+           SELLER — REGISTER
+           Calls: /api/seller_register.php
+           ════════════════════════════════════ -->
+      <div id="formSellerRegister" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Business Name *</label>
+          <input id="srName" class="form-input" type="text" placeholder="e.g. Priya's Kurta House" autocomplete="organization" />
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Email *</label>
+            <input id="srEmail" class="form-input" type="email" placeholder="you@example.com" autocomplete="email" />
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">City</label>
+            <input id="srCity" class="form-input" type="text" placeholder="e.g. Surat" autocomplete="address-level2" />
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label">Category</label>
+          <select id="srCat" class="form-select">
+            <option value="">Select your category</option>
+            <option value="clothing">Clothing & Apparel</option>
+            <option value="electronics">Electronics & Mobile</option>
+            <option value="food">Food & Grocery</option>
+            <option value="hardware">Hardware & Tools</option>
+            <option value="beauty">Beauty & Personal Care</option>
+            <option value="textiles">Textiles & Fabric</option>
+            <option value="furniture">Furniture & Home</option>
+            <option value="jewellery">Jewellery & Accessories</option>
+            <option value="wholesale">Wholesale / Distribution</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password * <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted2)">(min 8 characters)</span></label>
+          <div class="input-wrap">
+            <input id="srPwd" class="form-input" type="password" placeholder="Create a strong password" autocomplete="new-password" />
+            <button class="pwd-toggle" type="button" onclick="togglePwd('srPwd',this)" tabindex="-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button id="srBtn" class="form-submit" onclick="doSellerRegister()">Create Business Account →</button>
+        <p class="form-footer">Already have an account? <a href="#" onclick="switchTab('login');return false">Sign in</a></p>
+        <p style="text-align:center;font-size:11px;color:var(--muted2);margin-top:10px">
+          By registering, you agree to our <a href="#" style="color:var(--muted)">Terms</a> &amp; <a href="#" style="color:var(--muted)">Privacy Policy</a>
+        </p>
+      </div>
+
+      <!-- ════════════════════════════════════
+           BUYER — SIGN IN
+           Calls: /api/buyer_login.php
+           ════════════════════════════════════ -->
+      <div id="formBuyerLogin" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input id="blEmail" class="form-input" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <input id="blPwd" class="form-input" type="password" placeholder="Your password" autocomplete="current-password" />
+            <button class="pwd-toggle" type="button" onclick="togglePwd('blPwd',this)" tabindex="-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button id="blBtn" class="form-submit buyer-submit" onclick="doBuyerLogin()">Sign In →</button>
+        <p class="form-footer">New here? <a href="#" onclick="switchTab('register');return false">Create a buyer account</a></p>
+      </div>
+
+      <!-- ════════════════════════════════════
+           BUYER — REGISTER
+           Calls: /api/buyer_register.php
+           ════════════════════════════════════ -->
+      <div id="formBuyerRegister" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Your Name *</label>
+          <input id="brName" class="form-input" type="text" placeholder="e.g. Rahul Sharma" autocomplete="name" />
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Email *</label>
+            <input id="brEmail" class="form-input" type="email" placeholder="you@example.com" autocomplete="email" />
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">City</label>
+            <input id="brCity" class="form-input" type="text" placeholder="e.g. Mumbai" autocomplete="address-level2" />
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label">What are you looking to buy?</label>
+          <input id="brInterest" class="form-input" type="text" placeholder="e.g. Printed kurtis, Mobile accessories" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password * <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted2)">(min 8 characters)</span></label>
+          <div class="input-wrap">
+            <input id="brPwd" class="form-input" type="password" placeholder="Create a strong password" autocomplete="new-password" />
+            <button class="pwd-toggle" type="button" onclick="togglePwd('brPwd',this)" tabindex="-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button id="brBtn" class="form-submit buyer-submit" onclick="doBuyerRegister()">Find Local Sellers →</button>
+        <p class="form-footer">Already have an account? <a href="#" onclick="switchTab('login');return false">Sign in</a></p>
+      </div>
+
+    </div><!-- /modal-body -->
+  </div><!-- /modal-box -->
+</div><!-- /modal-overlay -->
+
+<script>
+/* ── CONFIG ──────────────────────────────────────────── */
+const API = '/api';
+const DEMO_MODE = false;
+
+/* ── CURSOR ──────────────────────────────────────────── */
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursor-ring');
+let mx = -100, my = -100, rx = -100, ry = -100;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animCursor() {
+  rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
+  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+  ring.style.left   = rx + 'px'; ring.style.top  = ry + 'px';
+  requestAnimationFrame(animCursor);
+})();
+document.querySelectorAll('a,button,[class*="chip"],[class*="card"],[class*="toggle"]').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+});
+
+/* ── THEME ───────────────────────────────────────────── */
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  const newTheme = isDark ? 'light' : 'dark';
+  html.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  const label = document.getElementById('mob-theme-label');
+  if (label) label.textContent = newTheme === 'dark' ? 'Switch to Light' : 'Switch to Dark';
+}
+(function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+    const label = document.getElementById('mob-theme-label');
+    if (label) label.textContent = saved === 'dark' ? 'Switch to Light' : 'Switch to Dark';
+  } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+})();
+
+/* ── NAV SCROLL ──────────────────────────────────────── */
+const nav = document.getElementById('mainNav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 20);
+});
+
+/* ── MOBILE MENU ─────────────────────────────────────── */
+function toggleMobile() {
+  const btn  = document.getElementById('burgerBtn');
+  const menu = document.getElementById('mobileMenu');
+  const isOpen = menu.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+  // Animate links staggered in
+  if (isOpen) {
+    const links = menu.querySelectorAll('.mob-nav-links a');
+    links.forEach((l, i) => {
+      l.style.opacity = '0';
+      l.style.transform = 'translateY(16px)';
+      setTimeout(() => {
+        l.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+        l.style.opacity = '1';
+        l.style.transform = 'translateY(0)';
+      }, 80 + i * 60);
+    });
+    const actions = menu.querySelector('.mob-menu-actions');
+    if (actions) {
+      actions.style.opacity = '0';
+      actions.style.transform = 'translateY(16px)';
+      setTimeout(() => {
+        actions.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+        actions.style.opacity = '1';
+        actions.style.transform = 'translateY(0)';
+      }, 320);
+    }
+  }
+}
+
+/* ── REVEAL ON SCROLL ─────────────────────────────────── */
+const revealEls = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.12 });
+revealEls.forEach(el => revealObs.observe(el));
+
+/* ── TYPING ANIMATION ────────────────────────────────── */
+const phrases = ['kurtis in Surat…', 'mobile accessories in Nagpur…', 'hardware tools in Pune…', 'organic spices in Jaipur…', 'handloom fabrics in Varanasi…', 'electronics in Hyderabad…'];
+let pi = 0, ci = 0, deleting = false;
+const typingEl = document.getElementById('typingText');
+function typeNext() {
+  const phrase = phrases[pi];
+  if (!deleting) {
+    typingEl.textContent = phrase.substring(0, ci + 1); ci++;
+    if (ci === phrase.length) { deleting = true; setTimeout(typeNext, 2200); return; }
+    setTimeout(typeNext, 60);
+  } else {
+    typingEl.textContent = phrase.substring(0, ci - 1); ci--;
+    if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; setTimeout(typeNext, 280); return; }
+    setTimeout(typeNext, 35);
+  }
+}
+setTimeout(typeNext, 1000);
+
+/* ── BUYER SEARCH ────────────────────────────────────── */
+function fillBuyerSearch(q) {
+  document.getElementById('buyerProduct').value = q;
+  document.getElementById('buyerProduct').focus();
+}
+function doBuyerSearch() {
+  const q    = document.getElementById('buyerProduct').value.trim();
+  const city = document.getElementById('buyerCity').value.trim();
+  if (!q) {
+    const inp = document.getElementById('buyerProduct');
+    inp.classList.add('error'); inp.focus();
+    setTimeout(() => inp.classList.remove('error'), 1600);
+    return;
+  }
+  const params = new URLSearchParams({ product: q });
+  if (city) params.set('city', city);
+  window.location.href = 'buyer/search.html?' + params.toString();
+}
+document.getElementById('buyerProduct').addEventListener('keydown', e => { if (e.key === 'Enter') doBuyerSearch(); });
+document.getElementById('buyerCity').addEventListener('keydown',   e => { if (e.key === 'Enter') doBuyerSearch(); });
+
+/* ── TESTIMONIALS ────────────────────────────────────── */
+const testimonials = [
+  { text: "BizBoost found 9 real competitors selling similar kurtis in Surat. The AI plan helped me beat 3 of them in 6 weeks.", name: "Priya Mehta", biz: "Priya's Kurta House, Surat", av: "av1", init: "P" },
+  { text: "Finally a tool that doesn't show Croma as my competitor. I sell mobile accessories from a small shop — it found real local dealers.", name: "Rahul Sharma", biz: "QuickMobile, Nagpur", av: "av2", init: "R" },
+  { text: "The keyword targets were spot on. Ranked on first page for 'printed tshirt Vadodara' within 3 weeks.", name: "Dev Patel", biz: "PrintZone, Vadodara", av: "av3", init: "D" },
+  { text: "3 buyer leads in the first week. One became a bulk order for ₹85,000. Worth every rupee.", name: "Sunita Agarwal", biz: "Agarwal Textiles, Jaipur", av: "av4", init: "S" },
+  { text: "The SEO fixes section alone was worth it. My Google Business Profile views went up 4x after implementing the changes.", name: "Amit Verma", biz: "Verma Hardware, Lucknow", av: "av5", init: "A" },
+  { text: "I was wasting money on Google Ads targeting wrong keywords. BizBoost showed me exactly what my customers search for.", name: "Neha Joshi", biz: "Neha's Beauty Studio, Pune", av: "av6", init: "N" },
+  { text: "Setup took 5 minutes. The report was so specific — it named my actual competitors on my street. Incredible.", name: "Vijay Reddy", biz: "Reddy Electronics, Hyderabad", av: "av1", init: "V" },
+  { text: "As a wholesaler, the B2B leads are gold. Retailers from my city now contact me directly through the platform.", name: "Ramesh Gupta", biz: "Gupta Fabrics Wholesale, Surat", av: "av3", init: "R" },
+];
+const track = document.getElementById('proofTrack');
+[...testimonials, ...testimonials].forEach(t => {
+  track.innerHTML += `
+    <div class="tcard">
+      <div class="tcard-stars">${'<svg width="13" height="13" viewBox="0 0 24 24" fill="var(--orange)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'.repeat(5)}</div>
+      <div class="tcard-body">"${t.text}"</div>
+      <div class="tcard-author">
+        <div class="tcard-avatar ${t.av}">${t.init}</div>
+        <div><div class="tcard-name">${t.name}</div><div class="tcard-biz">${t.biz}</div></div>
+      </div>
+    </div>`;
+});
+
+/* ── PASSWORD TOGGLE ─────────────────────────────────── */
+function togglePwd(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.style.color = 'var(--accent)';
+  } else {
+    inp.type = 'password';
+    btn.style.color = '';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODAL  —  role-aware (seller / buyer)
+   ═══════════════════════════════════════════════════════ */
+
+let _currentRole = 'seller';   // 'seller' | 'buyer'
+let _currentTab  = 'login';    // 'login'  | 'register'
+
+// Context hints per role+tab
+const CONTEXTS = {
+  seller: {
+    login:    'Welcome back! Sign in to access your dashboard, competitors & AI strategy.',
+    register: 'Grow your local business with AI. Find competitors, get buyer leads & SEO keywords.',
+  },
+  buyer: {
+    login:    'Sign in to browse verified local sellers and request quotes.',
+    register: 'Create a free buyer account to connect with local sellers near you.',
+  }
+};
+
+// All 4 form panel IDs
+const PANELS = ['formSellerLogin','formSellerRegister','formBuyerLogin','formBuyerRegister'];
+
+function openModal(tab = 'login', role = 'seller') {
+  document.getElementById('authModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  _currentRole = role;
+  _currentTab  = tab;
+  _renderModal();
+  clearMessages();
+}
+
+function closeModal() {
+  document.getElementById('authModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function overlayClose(e) {
+  if (e.target === document.getElementById('authModal')) closeModal();
+}
+
+function switchRole(role) {
+  _currentRole = role;
+  _renderModal();
+  clearMessages();
+}
+
+function switchTab(tab) {
+  _currentTab = tab;
+  _renderModal();
+  clearMessages();
+}
+
+function _renderModal() {
+  const isSeller = _currentRole === 'seller';
+  const isLogin  = _currentTab  === 'login';
+
+  // Role buttons
+  document.getElementById('roleSellerBtn').className =
+    'role-btn' + (isSeller ? ' seller-on' : '');
+  document.getElementById('roleBuyerBtn').className =
+    'role-btn' + (!isSeller ? ' buyer-on'  : '');
+
+  // Modal box class (controls tab underline colour)
+  document.getElementById('modalBox').className =
+    'modal-box' + (!isSeller ? ' buyer-mode' : '');
+
+  // Action tabs
+  document.getElementById('tabLogin').classList.toggle('on',    isLogin);
+  document.getElementById('tabRegister').classList.toggle('on', !isLogin);
+
+  // Context hint
+  document.getElementById('roleContext').textContent =
+    CONTEXTS[_currentRole][_currentTab];
+
+  // Show correct panel, hide all others
+  const active = isSeller
+    ? (isLogin ? 'formSellerLogin' : 'formSellerRegister')
+    : (isLogin ? 'formBuyerLogin'  : 'formBuyerRegister');
+
+  PANELS.forEach(id => {
+    document.getElementById(id).style.display = id === active ? 'block' : 'none';
+  });
+}
+
+function showErr(msg) {
+  const el = document.getElementById('formErr');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('formSuccess').classList.remove('show');
+}
+function showSuccess(msg) {
+  const el = document.getElementById('formSuccess');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('formErr').classList.remove('show');
+}
+function clearMessages() {
+  document.getElementById('formErr').classList.remove('show');
+  document.getElementById('formSuccess').classList.remove('show');
+}
+
+function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+/* ── CTA EMAIL ───────────────────────────────────────── */
+function ctaSignup() {
+  const email = document.getElementById('ctaEmail').value.trim();
+  openModal('register', 'seller');
+  if (email) setTimeout(() => { document.getElementById('srEmail').value = email; }, 350);
+}
+
+/* ═══════════════════════════════════════════
+   SELLER LOGIN   →  /api/seller_login.php
+   ═══════════════════════════════════════════ */
+async function doSellerLogin() {
+  clearMessages();
+  const email = document.getElementById('slEmail').value.trim();
+  const pwd   = document.getElementById('slPwd').value;
+  if (!email || !validateEmail(email)) { showErr('Please enter a valid email address.'); return; }
+  if (!pwd)                            { showErr('Please enter your password.'); return; }
+
+  const btn = document.getElementById('slBtn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  try {
+    if (DEMO_MODE) {
+      await new Promise(r => setTimeout(r, 800));
+      const stored = localStorage.getItem('seller');
+      if (!stored) throw new Error('No account found. Please register first.');
+      const seller = JSON.parse(stored);
+      if (seller.email !== email) throw new Error('Email not found. Please check and try again.');
+      const storedPwd = localStorage.getItem('sellerPwd');
+      if (storedPwd && storedPwd !== pwd) throw new Error('Incorrect password. Please try again.');
+      const d = JSON.parse(localStorage.getItem('sellerDetails') || '{}');
+      closeModal();
+      location.href = (!d.products_offered || !seller.city) ? 'seller/onboard.html' : 'seller/dashboard.html';
+      return;
+    }
+
+    const res   = await fetch(`${API}/seller_login.php`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pwd })
+    });
+    const data  = await _parseRes(res);
+    if (!data.success) throw new Error(data.error || 'Login failed. Please check your credentials.');
+
+    localStorage.setItem('seller',        JSON.stringify(data.seller));
+    localStorage.setItem('sellerDetails', JSON.stringify(data.details || {}));
+    localStorage.removeItem('lastReport');
+    localStorage.removeItem('lastIntel');
+    closeModal();
+    const d = data.details || {};
+    location.href = (!d.products_offered || !data.seller.city)
+      ? 'seller/onboard.html' : 'seller/dashboard.html';
+
+  } catch(err) {
+    showErr(err.message);
+    btn.disabled = false; btn.textContent = 'Sign In to Dashboard →';
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SELLER REGISTER  →  /api/seller_register.php
+   ═══════════════════════════════════════════ */
+async function doSellerRegister() {
+  clearMessages();
+  const name  = document.getElementById('srName').value.trim();
+  const email = document.getElementById('srEmail').value.trim();
+  const pwd   = document.getElementById('srPwd').value;
+  const city  = document.getElementById('srCity').value.trim();
+  const cat   = document.getElementById('srCat').value;
+
+  ['srName','srEmail','srPwd'].forEach(id => document.getElementById(id).classList.remove('error'));
+
+  if (!name)  { document.getElementById('srName').classList.add('error');  showErr('Please enter your business name.'); return; }
+  if (!email) { document.getElementById('srEmail').classList.add('error'); showErr('Please enter your email address.'); return; }
+  if (!validateEmail(email)) { document.getElementById('srEmail').classList.add('error'); showErr('Please enter a valid email address.'); return; }
+  if (!pwd || pwd.length < 8) { document.getElementById('srPwd').classList.add('error'); showErr('Password must be at least 8 characters.'); return; }
+
+  const btn = document.getElementById('srBtn');
+  btn.disabled = true; btn.textContent = 'Creating your account…';
+
+  try {
+    if (DEMO_MODE) {
+      await new Promise(r => setTimeout(r, 1000));
+      const existing = localStorage.getItem('seller');
+      if (existing && JSON.parse(existing).email === email)
+        throw new Error('An account with this email already exists. Please sign in instead.');
+      const seller = { id: 'demo_' + Date.now(), name, email, city, category: cat, created: new Date().toISOString() };
+      localStorage.setItem('seller',        JSON.stringify(seller));
+      localStorage.setItem('sellerPwd',     pwd);
+      localStorage.setItem('sellerDetails', JSON.stringify({}));
+      localStorage.removeItem('lastReport');
+      closeModal();
+      location.href = 'seller/onboard.html';
+      return;
+    }
+
+    const res  = await fetch(`${API}/seller_register.php`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password: pwd, city, category: cat })
+    });
+    const data = await _parseRes(res);
+    if (!data.success) throw new Error(data.error || 'Registration failed. Please try again.');
+
+    const seller = { id: data.seller_id, seller_id: data.seller_id, name, email, city, category: cat };
+    localStorage.setItem('seller',        JSON.stringify(seller));
+    localStorage.setItem('sellerDetails', JSON.stringify({}));
+    localStorage.removeItem('lastReport');
+    closeModal();
+    location.href = 'seller/onboard.html';
+
+  } catch(err) {
+    showErr(err.message);
+    btn.disabled = false; btn.textContent = 'Create Business Account →';
+  }
+}
+
+/* ═══════════════════════════════════════════
+   BUYER LOGIN   →  /api/buyer_login.php
+   ═══════════════════════════════════════════ */
+async function doBuyerLogin() {
+  clearMessages();
+  const email = document.getElementById('blEmail').value.trim();
+  const pwd   = document.getElementById('blPwd').value;
+  if (!email || !validateEmail(email)) { showErr('Please enter a valid email address.'); return; }
+  if (!pwd)                            { showErr('Please enter your password.'); return; }
+
+  const btn = document.getElementById('blBtn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  try {
+    const res  = await fetch(`${API}/buyer_login.php`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pwd })
+    });
+    const data = await _parseRes(res);
+    if (!data.success) throw new Error(data.error || 'Login failed. Please check your credentials.');
+
+    localStorage.setItem('buyer', JSON.stringify(data.buyer));
+    closeModal();
+    location.href = 'buyer/search.html';
+
+  } catch(err) {
+    showErr(err.message);
+    btn.disabled = false; btn.textContent = 'Sign In →';
+  }
+}
+
+/* ═══════════════════════════════════════════
+   BUYER REGISTER  →  /api/buyer_register.php
+   ═══════════════════════════════════════════ */
+async function doBuyerRegister() {
+  clearMessages();
+  const name     = document.getElementById('brName').value.trim();
+  const email    = document.getElementById('brEmail').value.trim();
+  const pwd      = document.getElementById('brPwd').value;
+  const city     = document.getElementById('brCity').value.trim();
+  const interest = document.getElementById('brInterest').value.trim();
+
+  ['brName','brEmail','brPwd'].forEach(id => document.getElementById(id).classList.remove('error'));
+
+  if (!name)  { document.getElementById('brName').classList.add('error');  showErr('Please enter your name.'); return; }
+  if (!email) { document.getElementById('brEmail').classList.add('error'); showErr('Please enter your email address.'); return; }
+  if (!validateEmail(email)) { document.getElementById('brEmail').classList.add('error'); showErr('Please enter a valid email address.'); return; }
+  if (!pwd || pwd.length < 8) { document.getElementById('brPwd').classList.add('error'); showErr('Password must be at least 8 characters.'); return; }
+
+  const btn = document.getElementById('brBtn');
+  btn.disabled = true; btn.textContent = 'Creating your account…';
+
+  try {
+    const res  = await fetch(`${API}/buyer_register.php`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password: pwd, city, product_interest: interest })
+    });
+    const data = await _parseRes(res);
+    if (!data.success) throw new Error(data.error || 'Registration failed. Please try again.');
+
+    const buyer = { id: data.buyer_id, name, email, city, product_interest: interest };
+    localStorage.setItem('buyer', JSON.stringify(buyer));
+    closeModal();
+    location.href = 'buyer/search.html';
+
+  } catch(err) {
+    showErr(err.message);
+    btn.disabled = false; btn.textContent = 'Find Local Sellers →';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE APP SHELL LOGIC
+   ═══════════════════════════════════════════════════════════ */
+(function() {
+  if (window.innerWidth > 480) return; // only run on mobile
+
+  const pages  = document.getElementById('mbPages');
+  const navBtns = document.querySelectorAll('.mb-nb');
+
+  /* ── Navigate to page index ─────────────────────────── */
+  function mbGo(idx) {
+    if (!pages) return;
+    pages.scrollTo({ left: idx * pages.offsetWidth, behavior: 'smooth' });
+  }
+  window.mbGo = mbGo;
+
+  /* ── Track active page via scroll ───────────────────── */
+  let scrollRaf = null;
+  if (pages) {
+    pages.addEventListener('scroll', function() {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = null;
+        const idx = Math.round(pages.scrollLeft / pages.offsetWidth);
+        navBtns.forEach((b, i) => b.classList.toggle('on', i === idx));
+        if (idx === 0) mbStartCounters();
+      });
+    }, { passive: true });
+  }
+
+  /* ── Stat counters (home page) ──────────────────────── */
+  let cntDone = false;
+  function mbStartCounters() {
+    if (cntDone) return;
+    cntDone = true;
+    document.querySelectorAll('.mb-stat-n[data-cnt]').forEach(el => {
+      const target = +el.dataset.cnt;
+      const suffix = el.dataset.sfx || '';
+      let t0 = null;
+      (function tick(ts) {
+        if (!t0) t0 = ts;
+        const p = Math.min((ts - t0) / 1200, 1);
+        const e = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.floor(e * target).toLocaleString('en-IN') + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+        else el.textContent = target.toLocaleString('en-IN') + suffix;
+      })(performance.now());
+    });
+    const rev = document.querySelector('.mb-stat-n[data-cnt-text]');
+    if (rev) {
+      let t0 = null;
+      (function tick(ts) {
+        if (!t0) t0 = ts;
+        const p = Math.min((ts - t0) / 1200, 1);
+        const e = 1 - Math.pow(1 - p, 3);
+        rev.textContent = '₹' + (e * 4.2).toFixed(1) + 'Cr+';
+        if (p < 1) requestAnimationFrame(tick);
+        else rev.textContent = '₹4.2Cr+';
+      })(performance.now());
+    }
+  }
+  setTimeout(mbStartCounters, 300);
+
+  /* ── Search ─────────────────────────────────────────── */
+  window.mbChip = function(q) {
+    const inp = document.getElementById('mbSearchInp');
+    if (inp) { inp.value = q; inp.focus(); }
+  };
+  window.mbSearch = function() {
+    const q = (document.getElementById('mbSearchInp')?.value || '').trim();
+    if (!q) return;
+    window.location.href = 'buyer/search.html?product=' + encodeURIComponent(q);
+  };
+  document.getElementById('mbSearchInp')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') mbSearch();
+  });
+
+  /* ── Pricing toggle ─────────────────────────────────── */
+  let isAnnual = false;
+  window.mbToggleBill = function() {
+    isAnnual = !isAnnual;
+    const track = document.getElementById('mbBillTrack');
+    const lm = document.getElementById('mbLblM');
+    const la = document.getElementById('mbLblA');
+    if (track) track.classList.toggle('on', isAnnual);
+    if (lm) lm.classList.toggle('on', !isAnnual);
+    if (la) la.classList.toggle('on', isAnnual);
+    const pi = document.getElementById('mbPricingPi');
+    if (pi) pi.classList.toggle('mb-bill-annual-mode', isAnnual);
+    document.querySelectorAll('.mb-plan-card[data-monthly]').forEach(card => {
+      const val = isAnnual ? card.dataset.annual : card.dataset.monthly;
+      const old = isAnnual ? card.dataset.monthly : null;
+      const valEl = card.querySelector('.mb-pp-val');
+      if (valEl) valEl.textContent = Number(val).toLocaleString('en-IN');
+      const oldEl = card.querySelector('.mb-plan-old');
+      if (oldEl && old) oldEl.textContent = '₹' + Number(old).toLocaleString('en-IN') + '/mo';
+    });
+  };
+
+  /* ── Testimonial rotator (join page) ────────────────── */
+  const testis = [
+    { q: '"BizBoost helped me rank #1 for \'kurti Surat\' in 3 weeks. Revenue doubled."', name: 'Priya Rathod', biz: "Priya's Kurta House, Surat", av: 'mb-av1', init: 'PR' },
+    { q: '"The AI playbook told me exactly which keywords to target. My footfall went up 40%."', name: 'Rahul Verma', biz: 'Verma Electronics, Nagpur', av: 'mb-av2', init: 'RV' },
+    { q: '"Within 2 months I connected with 3 wholesale buyers. Best investment I made."', name: 'Sunita Joshi', biz: 'Joshi Spice Traders, Jaipur', av: 'mb-av3', init: 'SJ' },
+  ];
+  let tIdx = 0;
+  const tdots = document.querySelectorAll('.mb-tdot');
+  function mbShowTesti(i) {
+    const t = testis[i];
+    const q    = document.getElementById('mbTestiQ');
+    const name = document.getElementById('mbTestiName');
+    const biz  = document.getElementById('mbTestiBiz');
+    const av   = document.getElementById('mbTestiAv');
+    if (!q) return;
+    q.style.opacity = '0';
+    setTimeout(() => {
+      q.textContent = t.q;
+      if (name) name.textContent = t.name;
+      if (biz)  biz.textContent = t.biz;
+      if (av)   { av.className = 'mb-av ' + t.av; av.textContent = t.init; }
+      tdots.forEach((d, j) => d.classList.toggle('on', j === i));
+      q.style.transition = 'opacity 0.35s';
+      q.style.opacity = '1';
+    }, 180);
+    tIdx = i;
+  }
+  tdots.forEach((d, i) => d.addEventListener('click', () => mbShowTesti(i)));
+  setInterval(() => mbShowTesti((tIdx + 1) % testis.length), 4500);
+
+  /* ── Join CTA ───────────────────────────────────────── */
+  window.mbJoinCta = function() {
+    const email = (document.getElementById('mbJoinInp')?.value || '').trim();
+    if (!email || !email.includes('@')) {
+      const inp = document.getElementById('mbJoinInp');
+      if (inp) { inp.style.borderColor = 'var(--red)'; inp.focus(); }
+      return;
+    }
+    openModal('register');
+  };
+  document.getElementById('mbJoinInp')?.addEventListener('input', function() {
+    this.style.borderColor = '';
+  });
+
+})();
+async function _parseRes(res) {
+  const text = await res.text();
+  const clean = text.trim().replace(/^\uFEFF/, '');
+  try { return JSON.parse(clean); }
+  catch(e) { throw new Error('Server error. Please try again later.'); }
+}
+
+/* ── Keyboard shortcuts ──────────────────────────────── */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ── Remove error state on input ─────────────────────── */
+['slEmail','slPwd','srName','srEmail','srPwd','blEmail','blPwd','brName','brEmail','brPwd'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', function() { this.classList.remove('error'); });
+});
+['slPwd','blPwd'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') { id.startsWith('sl') ? doSellerLogin() : doBuyerLogin(); } });
+});
+
+/* ── ALREADY LOGGED IN ───────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  // Initialise modal to seller-login state (hidden)
+  _renderModal();
+
+  const s = localStorage.getItem('seller');
+  if (s) {
+    try {
+      const seller = JSON.parse(s);
+      if (seller?.id) {
+        document.getElementById('navCta').innerHTML = `
+          <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+            <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <a href="seller/dashboard.html" class="btn-ghost">Dashboard</a>
+          <button class="btn-accent" onclick="localStorage.clear();location.reload()">Sign Out</button>`;
+        document.querySelectorAll('#navCta a,#navCta button').forEach(el => {
+          el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+          el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+        });
+        const saved = localStorage.getItem('theme');
+        if (saved) document.documentElement.setAttribute('data-theme', saved);
+      }
+    } catch(e) {}
+  }
+});
+
+/* removed — consolidated above */
+
+/* ── SCROLL PROGRESS BAR ─────────────────────────────── */
+const progressBar = document.getElementById('scroll-progress');
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  progressBar.style.width = pct + '%';
+}, { passive: true });
+
+/* ── ANIMATED COUNTERS ───────────────────────────────── */
+function animateCounter(el, target, suffix, duration = 1600) {
+  let start = null;
+  const step = (ts) => {
+    if (!start) start = ts;
+    const progress = Math.min((ts - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const val = Math.floor(eased * target);
+    el.textContent = val.toLocaleString('en-IN') + suffix;
+    if (progress < 1) requestAnimationFrame(step);
+    else el.textContent = target.toLocaleString('en-IN') + suffix;
+  };
+  requestAnimationFrame(step);
+}
+
+const counterDefs = [
+  { selector: '.hero-stat:nth-child(1) .hero-stat-num', target: 2400,  suffix: '+' },
+  { selector: '.hero-stat:nth-child(2) .hero-stat-num', target: 4.2,   suffix: 'Cr+', isFloat: true },
+  { selector: '.hero-stat:nth-child(3) .hero-stat-num', target: 18000, suffix: '+' },
+  { selector: '.hero-stat:nth-child(4) .hero-stat-num', target: 94,    suffix: '%' },
+];
+
+let countersStarted = false;
+const heroStats = document.querySelector('.hero-stats');
+if (heroStats) {
+  const statsObs = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting && !countersStarted) {
+      countersStarted = true;
+      counterDefs.forEach(def => {
+        const el = document.querySelector(def.selector);
+        if (!el) return;
+        if (def.isFloat) {
+          let start = null;
+          const step = (ts) => {
+            if (!start) start = ts;
+            const p = Math.min((ts - start) / 1600, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = '₹' + (eased * def.target).toFixed(1) + def.suffix;
+            if (p < 1) requestAnimationFrame(step);
+            else el.textContent = '₹' + def.target + def.suffix;
+          };
+          requestAnimationFrame(step);
+        } else {
+          animateCounter(el, def.target, def.suffix);
+        }
+      });
+    }
+  }, { threshold: 0.4 });
+  statsObs.observe(heroStats);
+}
+
+/* ── RIPPLE EFFECT ───────────────────────────────────── */
+document.querySelectorAll('.btn-accent, .buyer-bar-btn, .price-cta, .mobile-fab').forEach(btn => {
+  btn.classList.add('ripple-container');
+  btn.addEventListener('click', function(e) {
+    const rect = this.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size/2}px;top:${e.clientY - rect.top - size/2}px`;
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  });
+});
+
+/* ── HERO CHIP CLICK FEEDBACK ────────────────────────── */
+document.querySelectorAll('.hero-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    this.style.borderColor = 'var(--accent)';
+    this.style.color = 'var(--accent)';
+    this.style.background = 'rgba(37,99,235,0.08)';
+    setTimeout(() => {
+      this.style.borderColor = '';
+      this.style.color = '';
+      this.style.background = '';
+    }, 600);
+  });
+});
+
+/* ── HIDE MOBILE FAB WHEN MODAL OPEN ────────────────── */
+const fab = document.querySelector('.mobile-fab');
+const origOpen = window.openModal;
+window.openModal = function(...args) {
+  if (fab) fab.style.display = 'none';
+  origOpen?.(...args);
+};
+const origClose = window.closeModal;
+window.closeModal = function(...args) {
+  if (fab && window.innerWidth <= 640) fab.style.display = 'block';
+  origClose?.(...args);
+};
+
+/* ── BACK TO TOP VISIBILITY ──────────────────────────── */
+const backToTop = document.getElementById('back-to-top');
+window.addEventListener('scroll', () => {
+  if (backToTop) backToTop.classList.toggle('visible', window.scrollY > 400);
+}, { passive: true });
+
+/* ── PARTICLES ANIMATION ─────────────────────────────── */
+(function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], animId;
+  // 60 particles balances visual density with rendering performance on mid-range devices
+  const PARTICLE_COUNT = 60;
+
+  function resize() {
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+
+  function randomParticle() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.8 + 0.4,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      alpha: Math.random() * 0.5 + 0.15,
+    };
+  }
+
+  function init() {
+    resize();
+    particles = Array.from({ length: PARTICLE_COUNT }, randomParticle);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    const col = isDark ? '37,99,235' : '37,99,235';
+
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${col},${p.alpha})`;
+      ctx.fill();
+
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < -5) p.x = W + 5;
+      if (p.x > W + 5) p.x = -5;
+      if (p.y < -5) p.y = H + 5;
+      if (p.y > H + 5) p.y = -5;
+    });
+
+    // Draw connecting lines
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(${col},${0.06 * (1 - dist / 100)})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+
+    animId = requestAnimationFrame(draw);
+  }
+
+  init();
+  draw();
+  window.addEventListener('resize', () => { cancelAnimationFrame(animId); init(); draw(); });
+})();
+
+/* ── TOAST SYSTEM ────────────────────────────────────── */
+function showToast(title, msg, type = 'success', duration = 4000) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const icons = {
+    success: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    error:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    info:    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  };
+
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <div class="toast-icon ${type}">${icons[type] || icons.info}</div>
+    <div class="toast-body">
+      <div class="toast-title">${title}</div>
+      ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
+    </div>
+    <button class="toast-close" onclick="dismissToast(this.parentElement)" aria-label="Dismiss">×</button>
+  `;
+  container.appendChild(toast);
+
+  // Animate in
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+
+  // Auto dismiss
+  const timer = setTimeout(() => dismissToast(toast), duration);
+  toast._timer = timer;
+}
+
+function dismissToast(toast) {
+  if (!toast) return;
+  clearTimeout(toast._timer);
+  toast.classList.add('hide');
+  toast.classList.remove('show');
+  setTimeout(() => toast.remove(), 350);
+}
+
+/* ── FAQ ACCORDION ───────────────────────────────────── */
+function toggleFaq(btn) {
+  const item   = btn.closest('.faq-item');
+  const answer = item.querySelector('.faq-answer');
+  const isOpen = btn.classList.contains('open');
+
+  // Close all others
+  document.querySelectorAll('.faq-question.open').forEach(q => {
+    if (q !== btn) {
+      q.classList.remove('open');
+      q.setAttribute('aria-expanded', 'false');
+      q.closest('.faq-item').querySelector('.faq-answer').classList.remove('open');
+    }
+  });
+
+  // Toggle current
+  btn.classList.toggle('open', !isOpen);
+  btn.setAttribute('aria-expanded', String(!isOpen));
+  answer.classList.toggle('open', !isOpen);
+}
+
+/* ── PRICING BILLING TOGGLE ──────────────────────────── */
+let isAnnual = false;
+function toggleBilling() {
+  isAnnual = !isAnnual;
+  const toggle = document.getElementById('billingToggle');
+  const grid   = document.getElementById('pricingGrid');
+  const lblM   = document.getElementById('lblMonthly');
+  const lblA   = document.getElementById('lblAnnual');
+  const badge  = document.getElementById('saveBadge');
+
+  toggle?.classList.toggle('annual', isAnnual);
+  toggle?.setAttribute('aria-checked', String(isAnnual));
+  grid?.classList.toggle('pricing-annual', isAnnual);
+  lblM?.classList.toggle('active', !isAnnual);
+  lblA?.classList.toggle('active', isAnnual);
+  badge?.classList.toggle('hidden', !isAnnual);
+
+  // Update prices for paid cards
+  document.querySelectorAll('.price-card[data-monthly]').forEach(card => {
+    const monthly  = parseInt(card.dataset.monthly);
+    const annual   = parseInt(card.dataset.annual);
+    const valEl    = card.querySelector('.price-val');
+    const oldEl    = card.querySelector('.old-price');
+    if (!valEl) return;
+
+    if (isAnnual) {
+      valEl.textContent = annual.toLocaleString('en-IN');
+      if (oldEl) oldEl.textContent = '₹' + monthly.toLocaleString('en-IN');
+    } else {
+      valEl.textContent = monthly.toLocaleString('en-IN');
+      if (oldEl) oldEl.textContent = '₹' + monthly.toLocaleString('en-IN');
+    }
+  });
+}
+
+// Allow keyboard activation of billing toggle
+document.addEventListener('DOMContentLoaded', () => {
+  const bt = document.getElementById('billingToggle');
+  if (bt) bt.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleBilling(); } });
+});
+
+/* ── STATS HIGHLIGHT COUNTERS ────────────────────────── */
+(function initStatsHighlight() {
+  const hlGrid = document.querySelector('#stats-highlight .stats-hl-grid');
+  if (!hlGrid) return;
+  let ran = false;
+  const obs = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting || ran) return;
+    ran = true;
+    document.querySelectorAll('.stat-hl-num[data-count]').forEach(el => {
+      const target = parseInt(el.dataset.count);
+      const suffix = el.dataset.suffix || '';
+      let start = null;
+      (function step(ts) {
+        if (!start) start = ts;
+        const p = Math.min((ts - start) / 1600, 1);
+        const e = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.floor(e * target).toLocaleString('en-IN') + suffix;
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = target.toLocaleString('en-IN') + suffix;
+      })(performance.now());
+    });
+  }, { threshold: 0.3 });
+  obs.observe(hlGrid);
+})();
+
+/* ── ENHANCED CTA SIGNUP WITH TOAST ─────────────────── */
+const _origCtaSignup = window.ctaSignup;
+window.ctaSignup = function() {
+  const email = document.getElementById('ctaEmail')?.value.trim();
+  if (!email || !email.includes('@')) {
+    showToast('Invalid email', 'Please enter a valid email address.', 'error');
+    return;
+  }
+  showToast('You\'re in! 🎉', 'Opening registration form…', 'success');
+  if (_origCtaSignup) {
+    _origCtaSignup();
+  } else {
+    openModal('register', 'seller');
+    setTimeout(() => { const srEmail = document.getElementById('srEmail'); if (srEmail && email) srEmail.value = email; }, 350);
+  }
+};
+</script>
+</body>
+</html>
