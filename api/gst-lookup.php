@@ -51,7 +51,6 @@ try {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT        => 10,
         CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_HTTPHEADER     => [
             "Accept: application/json",
             "Content-Type: application/json",
@@ -87,7 +86,7 @@ try {
                 "city"          => $addr["dst"] ?? $addr["loc"] ?? "",
                 "business_type" => $d["ctb"] ?? "",
                 "status"        => $d["sts"] ?? "",
-                "nature"        => $d["pradr"]["ntr"] ?? "",
+                "nature"        => $d["ntr"] ?? $d["pradr"]["ntr"] ?? "",
             ];
         }
     }
@@ -104,7 +103,6 @@ if (!$result) {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 8,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_HTTPHEADER     => [
                 "Accept: application/json",
                 "Content-Type: application/json",
