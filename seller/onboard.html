@@ -397,7 +397,7 @@
     gap: 6px;
   }
 
-  .gst-ok::before { content: '✓'; font-weight: 700; }
+  .gst-ok::before { content: '\2713'; font-weight: 700; }
 
   /* ── Sticky Footer ─────────────────────────────────────────── */
   .sticky-foot {
@@ -721,7 +721,7 @@
   <a href="../index.html" class="nav-logo">Biz<span>Boost</span></a>
   <div class="nav-right">
     <a href="dashboard.html" class="nav-link">Dashboard</a>
-    <button class="theme-btn" id="themeBtn" title="Toggle theme" onclick="toggleTheme()">🌙</button>
+    <button class="theme-btn" id="themeBtn" title="Toggle theme" onclick="toggleTheme()"><svg id="themeSvg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></button>
   </div>
 </nav>
 
@@ -741,16 +741,16 @@
   <!-- ── GST Question Card ────────────────────────────────── -->
   <div class="s-card" id="gstQuestionCard">
     <div class="gst-gate">
-      <h2>🚀 Quick Setup</h2>
+      <h2>Quick Setup</h2>
       <p>Do you have a GST number? We'll auto-fill your business name, address, and state instantly — saving you time.</p>
       <div class="gst-choice-btns">
         <button type="button" class="gst-choice-btn" id="btnHasGST" onclick="chooseGST(true)">
-          <span class="btn-icon">✅</span>
+          <span class="btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
           <span>Yes, I have GST</span>
           <span class="btn-sub">Auto-fill from GST number</span>
         </button>
         <button type="button" class="gst-choice-btn" id="btnNoGST" onclick="chooseGST(false)">
-          <span class="btn-icon">✏️</span>
+          <span class="btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
           <span>No, fill manually</span>
           <span class="btn-sub">Enter details yourself</span>
         </button>
@@ -761,7 +761,7 @@
   <!-- ── GST Lookup Card (shown if yes) ───────────────────── -->
   <div class="s-card" id="gstLookupCard" style="display:none">
     <div class="s-card-header">
-      <div class="s-card-icon">🔎</div>
+      <div class="s-card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       <h3>Enter Your GST Number</h3>
     </div>
     <div class="gst-lookup-wrap">
@@ -781,7 +781,7 @@
 
   <!-- ── Pre-filled Banner (shown after GST fetch) ─────────── -->
   <div class="prefilled-banner" id="prefilledBanner" style="display:none">
-    ✓ Details auto-filled from GST. Please review and complete the remaining fields.
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Details auto-filled from GST. Please review and complete the remaining fields.
   </div>
 
   <form id="profileForm" onsubmit="saveProfile(event)">
@@ -790,7 +790,7 @@
     <!-- ── 1. Basic Info ────────────────────────────────────── -->
     <div class="s-card">
       <div class="s-card-header">
-        <div class="s-card-icon">🏢</div>
+        <div class="s-card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="6" x2="15" y2="6"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="15" y2="14"/><line x1="9" y1="18" x2="15" y2="18"/></svg></div>
         <h3>Basic Business Information</h3>
       </div>
       <div class="g2" style="margin-bottom:14px">
@@ -857,7 +857,7 @@
     <!-- ── 2. Location ─────────────────────────────────────── -->
     <div class="s-card">
       <div class="s-card-header">
-        <div class="s-card-icon">📍</div>
+        <div class="s-card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
         <h3>Location Details</h3>
       </div>
       <div class="form-group" style="margin-bottom:14px">
@@ -894,7 +894,7 @@
     <!-- ── 3. Legal & Financial ────────────────────────────── -->
     <div class="s-card">
       <div class="s-card-header">
-        <div class="s-card-icon">📋</div>
+        <div class="s-card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
         <h3>Legal &amp; Financial</h3>
       </div>
       <div class="g2" style="margin-bottom:14px">
@@ -939,7 +939,7 @@
     <!-- ── 4. Contact & Social ─────────────────────────────── -->
     <div class="s-card">
       <div class="s-card-header">
-        <div class="s-card-icon">📲</div>
+        <div class="s-card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
         <h3>Contact &amp; Social Media</h3>
       </div>
       <div class="g2" style="margin-bottom:14px">
@@ -996,20 +996,23 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ✅ Correct path: seller/ → ../api/
+// Correct path: seller/ → ../api/
 const API = '../api/';
 
 // ── Theme ────────────────────────────────────────────────────
+const ICON_MOON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>';
+const ICON_SUN  = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+
 const savedTheme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
-document.getElementById('themeBtn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+document.getElementById('themeBtn').innerHTML = savedTheme === 'dark' ? ICON_SUN : ICON_MOON;
 
 function toggleTheme() {
   const cur  = document.documentElement.getAttribute('data-theme');
   const next = cur === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('theme', next);
-  document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+  document.getElementById('themeBtn').innerHTML = next === 'dark' ? ICON_SUN : ICON_MOON;
 }
 
 // ── Load seller identity ─────────────────────────────────────
@@ -1105,7 +1108,7 @@ async function fetchGSTDetails() {
     applyGSTData(gstin, data);
 
     status.className = 'gst-status success';
-    status.innerHTML = '✓ Business details fetched successfully!';
+    status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Business details fetched successfully!';
 
     // Show form
     document.getElementById('formCards').style.display = 'block';
@@ -1120,7 +1123,7 @@ async function fetchGSTDetails() {
     applyGSTFallback(gstin);
 
     status.className = 'gst-status error';
-    status.innerHTML = `⚠️ Could not reach lookup service — filled what we could from the GST number. Please complete the rest manually.`;
+    status.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Could not reach lookup service — filled what we could from the GST number. Please complete the rest manually.`;
 
     document.getElementById('formCards').style.display = 'block';
     document.getElementById('prefilledBanner').style.display = 'flex';
@@ -1325,7 +1328,7 @@ async function saveProfile(e) {
     localStorage.removeItem('lastReport');
 
     toast('Profile saved successfully!', 3000, 'success');
-    btn.textContent = 'Saved! ✓';
+    btn.textContent = 'Saved!';
     setTimeout(() => location.href = 'dashboard.html?analyse=1', 900);
 
   } catch (err) {
