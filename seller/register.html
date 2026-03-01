@@ -240,6 +240,8 @@ async function handleRegister(e){
     const d=await res.json();if(!d.success)throw new Error(d.error||'Registration failed');
     const {password:_pw,...safeP}=p;
     localStorage.setItem('seller',JSON.stringify({...safeP,id:d.seller_id,seller_id:d.seller_id}));
+    localStorage.setItem('sellerDetails',JSON.stringify({}));
+    localStorage.removeItem('lastReport');
     toast('Account created! Redirecting…');setTimeout(()=>location.href='../seller/onboard.html',1200);
   }catch(err){showErr('regErr',err.message);btn.disabled=false;btn.textContent='Create Free Account →'}
 }

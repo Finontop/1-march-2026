@@ -1068,6 +1068,7 @@ const GST_STATES = {
 function chooseGST(hasGST) {
   document.getElementById('btnHasGST').classList.toggle('active', hasGST);
   document.getElementById('btnNoGST').classList.toggle('active', !hasGST);
+  document.getElementById('gstQuestionCard').style.display = 'none';
 
   if (hasGST) {
     document.getElementById('gstLookupCard').style.display = 'block';
