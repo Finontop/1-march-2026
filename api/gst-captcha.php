@@ -16,14 +16,11 @@ function respond($d) { ob_end_clean(); echo json_encode($d); exit; }
 
 session_start();
 
-// Validate session_id() to ensure safe file path (alphanumeric/hyphen only)
-$sid = session_id();
-if (!preg_match('/^[a-zA-Z0-9\-]+$/', $sid)) {
-    respond(["success" => false, "error" => "Invalid session"]);
-}
+// Generate a unique token for this captcha request
+$token = bin2hex(random_bytes(16));
 
-// Create a unique cookie jar file for this session
-$cookieJar = sys_get_temp_dir() . '/gst_session_' . $sid . '.txt';
+// Create a unique cookie jar file keyed by token
+$cookieJar = sys_get_temp_dir() . '/gst_captcha_' . $token . '.txt';
 
 $ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
@@ -69,11 +66,12 @@ if ($captchaCode !== 200 || !$captchaRaw) {
     respond(["success" => false, "error" => "Could not fetch captcha"]);
 }
 
-// Store the cookie jar path in the session for the lookup step
+// Store the cookie jar path in the session for the lookup step (fallback)
 $_SESSION['gst_cookie_jar'] = $cookieJar;
 
 respond([
     "success" => true,
     "captcha" => "data:image/png;base64," . base64_encode($captchaRaw),
+    "token"   => $token,
 ]);
 ?>
