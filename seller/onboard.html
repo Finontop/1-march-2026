@@ -1189,14 +1189,52 @@ async function verifyGSTCaptcha() {
     const hasRealData = !data.fallback && (data.trade_name || data.legal_name || data.address);
 
     if (hasRealData) {
+      // Immediately fill basic fields from GST data
       applyGSTData(gstin, data);
       document.getElementById('gstCaptchaSection').style.display = 'none';
       const safeStatus = (data.status || '').replace(/[<>&"']/g, '');
       const statusBadge = safeStatus ? ` · GST Status: <strong>${safeStatus}</strong>` : '';
-      status.className = 'gst-status success';
-      status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Business details fetched successfully!' + statusBadge;
+
+      // Show form with basic data first
       document.getElementById('formCards').style.display = 'block';
       document.getElementById('prefilledBanner').style.display = 'flex';
+      document.getElementById('progWrap').style.display = '';
+      document.getElementById('progLabel').style.display = '';
+      updateProgress();
+
+      // Now send to Groq AI for intelligent parsing in background
+      status.className = 'gst-status loading';
+      status.innerHTML = '<div class="gst-mini-spin"></div> AI is analyzing your business details…';
+      status.style.display = 'flex';
+
+      try {
+        const aiRes = await fetch(`${API}gst-ai-parse.php`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            seller_id: seller?.id || 0,
+            gst_raw: data
+          })
+        });
+        const aiData = await aiRes.json();
+
+        if (aiData.success && aiData.parsed) {
+          applyAIParsedData(gstin, aiData.parsed);
+          status.className = 'gst-status success';
+          status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> AI parsed & filled all details!' + statusBadge + (aiData.parsed.saved_to_db ? ' · Saved to database' : '');
+        } else {
+          // AI failed but basic GST data already applied
+          status.className = 'gst-status success';
+          status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Business details fetched!' + statusBadge;
+        }
+      } catch (aiErr) {
+        // AI call failed but basic GST data already applied — that's fine
+        status.className = 'gst-status success';
+        status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Business details fetched successfully!' + statusBadge;
+      }
+
+      updateProgress();
+      setTimeout(() => document.getElementById('formCards').scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     } else {
       applyGSTFallback(gstin);
       document.getElementById('gstCaptchaSection').style.display = 'none';
@@ -1204,12 +1242,11 @@ async function verifyGSTCaptcha() {
       status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Could not fetch business details — filled state from GST number. Please complete the rest manually.';
       document.getElementById('formCards').style.display = 'block';
       document.getElementById('prefilledBanner').style.display = 'none';
+      document.getElementById('progWrap').style.display = '';
+      document.getElementById('progLabel').style.display = '';
+      updateProgress();
+      setTimeout(() => document.getElementById('formCards').scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     }
-
-    document.getElementById('progWrap').style.display = '';
-    document.getElementById('progLabel').style.display = '';
-    updateProgress();
-    setTimeout(() => document.getElementById('formCards').scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
 
   } catch (err) {
     applyGSTFallback(gstin);
@@ -1278,6 +1315,28 @@ function applyGSTFallback(gstin) {
   const stateName = GST_STATES[stateCode] || '';
   setField('pstate', stateName);
   checkGST(gstin);
+}
+
+// ── Apply AI-parsed GST Data to Form ─────────────────────────
+function applyAIParsedData(gstin, ai) {
+  if (ai.business_name)    setField('pname',          ai.business_name);
+  if (ai.business_type)    setField('pbusinesstype',  ai.business_type);
+  if (ai.category)         setField('pcategory',      ai.category);
+  if (ai.products_offered) setField('pproducts',      ai.products_offered);
+  if (ai.business_desc)    setField('pdesc',          ai.business_desc);
+  if (ai.address)          setField('paddress',       ai.address);
+  if (ai.city)             setField('pcity',          ai.city);
+  if (ai.state)            setField('pstate',         ai.state);
+  if (ai.pincode)          setField('ppincode',       ai.pincode);
+  if (ai.gst_number)       setField('pgst',           ai.gst_number);
+  if (ai.annual_turnover)  setField('pturnover',      ai.annual_turnover);
+  if (ai.employees)        setField('pemployees',     ai.employees);
+  if (ai.delivery_radius)  setField('pdeliveryradius',ai.delivery_radius);
+  if (ai.certifications)   setField('pcerts',         ai.certifications);
+
+  checkGST(gstin);
+  const footEl = document.getElementById('footName');
+  if (footEl) footEl.textContent = ai.business_name || 'Your Business';
 }
 
 // ── Progress ─────────────────────────────────────────────────
