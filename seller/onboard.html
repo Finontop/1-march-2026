@@ -1231,21 +1231,41 @@ function prefillForm(s, d) {
   document.getElementById('footName').textContent = s.name || 'Your Business';
 
   // If seller already has saved business data, skip the gate and show form
-  const hasData = d.address || d.products_offered;
+  const hasData = (d.address && d.address.trim()) || (d.products_offered && d.products_offered.trim());
   if (hasData) {
     REG_PREFILLED.clear();  // returning user: all their data counts toward progress
     document.getElementById('gstQuestionCard').style.display = 'none';
+    document.getElementById('gstLookupCard').style.display = 'none';
     document.getElementById('formCards').style.display = 'block';
     document.getElementById('progWrap').style.display = '';
     document.getElementById('progLabel').style.display = '';
     if (d.gst_number) {
       document.getElementById('gstLookupInput').value = d.gst_number;
     }
+  } else {
+    // New seller: always show the GST question card first
+    document.getElementById('gstQuestionCard').style.display = '';
+    document.getElementById('gstLookupCard').style.display = 'none';
+    document.getElementById('formCards').style.display = 'none';
+    document.getElementById('prefilledBanner').style.display = 'none';
   }
   updateProgress();
 }
 
 // ── Load from DB ─────────────────────────────────────────────
+// Safety: remove overlay after 6s even if fetch hangs
+const overlayTimer = setTimeout(() => {
+  const overlay = document.getElementById('loadOverlay');
+  if (overlay && !overlay.classList.contains('hide')) {
+    console.warn('Overlay timeout — removing loading screen');
+    overlay.classList.add('hide');
+    setTimeout(() => overlay.style.display = 'none', 400);
+    document.getElementById('saveBtn').disabled = false;
+    // Show GST card as fallback for new sellers
+    prefillForm(seller, details || {});
+  }
+}, 6000);
+
 async function loadFromDB() {
   try {
     const res  = await fetch(`${API}seller-load.php?seller_id=${seller.id}`);
@@ -1271,6 +1291,7 @@ async function loadFromDB() {
     prefillForm(seller, details || {});
     toast('Could not load latest data from server.', 3000);
   } finally {
+    clearTimeout(overlayTimer);
     const overlay = document.getElementById('loadOverlay');
     overlay.classList.add('hide');
     setTimeout(() => overlay.style.display = 'none', 400);

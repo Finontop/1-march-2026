@@ -757,6 +757,19 @@
     .seller-badge { background: rgba(37,99,235,0.18); color: var(--accent); }
     .buyer-badge  { background: rgba(34,197,94,0.14); color: var(--green); }
 
+    /* Role picker heading (shown before role is selected on register) */
+    .role-picker-heading {
+      padding: 8px 26px 0;
+      font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700;
+      color: var(--text); text-align: center;
+      letter-spacing: -0.02em;
+    }
+    .role-picker-sub {
+      padding: 4px 26px 0;
+      font-size: 13px; color: var(--muted); text-align: center;
+      line-height: 1.45;
+    }
+
     /* Context label that changes based on role */
     .role-context {
       padding: 10px 26px 0;
@@ -2847,6 +2860,8 @@
     </div>
 
     <!-- ── ROLE TOGGLE ─────────────────────────────────────── -->
+    <p class="role-picker-heading" id="rolePickerHeading" style="display:none">How will you use BizBoost?</p>
+    <p class="role-picker-sub" id="rolePickerSub" style="display:none">Select your role to get started</p>
     <div class="role-toggle-wrap">
       <div class="role-toggle">
 
@@ -3190,6 +3205,7 @@ function togglePwd(inputId, btn) {
 
 let _currentRole = 'seller';   // 'seller' | 'buyer'
 let _currentTab  = 'login';    // 'login'  | 'register'
+let _roleSelected = true;      // false = show role picker step first
 
 // Context hints per role+tab
 const CONTEXTS = {
@@ -3211,6 +3227,8 @@ function openModal(tab = 'login', role = 'seller') {
   document.body.style.overflow = 'hidden';
   _currentRole = role;
   _currentTab  = tab;
+  // For registration, show role picker step first (unless role was explicitly provided)
+  _roleSelected = (tab !== 'register');
   _renderModal();
   clearMessages();
 }
@@ -3226,6 +3244,7 @@ function overlayClose(e) {
 
 function switchRole(role) {
   _currentRole = role;
+  _roleSelected = true;
   _renderModal();
   clearMessages();
 }
@@ -3239,24 +3258,34 @@ function switchTab(tab) {
 function _renderModal() {
   const isSeller = _currentRole === 'seller';
   const isLogin  = _currentTab  === 'login';
+  const pickingRole = !_roleSelected && !isLogin;
 
-  // Role buttons
+  // Role picker heading (shown only during role selection step)
+  document.getElementById('rolePickerHeading').style.display = pickingRole ? '' : 'none';
+  document.getElementById('rolePickerSub').style.display     = pickingRole ? '' : 'none';
+
+  // Role buttons — no highlight when role hasn't been chosen yet
   document.getElementById('roleSellerBtn').className =
-    'role-btn' + (isSeller ? ' seller-on' : '');
+    'role-btn' + (!pickingRole && isSeller ? ' seller-on' : '');
   document.getElementById('roleBuyerBtn').className =
-    'role-btn' + (!isSeller ? ' buyer-on'  : '');
+    'role-btn' + (!pickingRole && !isSeller ? ' buyer-on'  : '');
 
   // Modal box class (controls tab underline colour)
   document.getElementById('modalBox').className =
     'modal-box' + (!isSeller ? ' buyer-mode' : '');
 
-  // Action tabs
+  // Action tabs — hidden during role picker step
+  document.querySelector('.modal-tabs').style.display = pickingRole ? 'none' : '';
   document.getElementById('tabLogin').classList.toggle('on',    isLogin);
   document.getElementById('tabRegister').classList.toggle('on', !isLogin);
 
   // Context hint
-  document.getElementById('roleContext').textContent =
-    CONTEXTS[_currentRole][_currentTab];
+  document.getElementById('roleContext').textContent = pickingRole
+    ? ''
+    : CONTEXTS[_currentRole][_currentTab];
+
+  // Forms — hidden during role picker step
+  document.querySelector('.modal-body').style.display = pickingRole ? 'none' : '';
 
   // Show correct panel, hide all others
   const active = isSeller
