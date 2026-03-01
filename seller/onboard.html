@@ -735,8 +735,8 @@
   </div>
 
   <!-- Progress -->
-  <div class="prog-wrap"><div class="prog-bar" id="progBar"></div></div>
-  <div class="prog-label" id="progLabel">Loading…</div>
+  <div class="prog-wrap" id="progWrap" style="display:none"><div class="prog-bar" id="progBar"></div></div>
+  <div class="prog-label" id="progLabel" style="display:none">Loading…</div>
 
   <!-- ── GST Question Card ────────────────────────────────── -->
   <div class="s-card" id="gstQuestionCard">
@@ -1077,6 +1077,8 @@ function chooseGST(hasGST) {
     document.getElementById('gstLookupCard').style.display = 'none';
     document.getElementById('formCards').style.display = 'block';
     document.getElementById('prefilledBanner').style.display = 'none';
+    document.getElementById('progWrap').style.display = '';
+    document.getElementById('progLabel').style.display = '';
     updateProgress();
   }
 }
@@ -1113,6 +1115,8 @@ async function fetchGSTDetails() {
     // Show form
     document.getElementById('formCards').style.display = 'block';
     document.getElementById('prefilledBanner').style.display = 'flex';
+    document.getElementById('progWrap').style.display = '';
+    document.getElementById('progLabel').style.display = '';
     updateProgress();
 
     // Smooth scroll to form
@@ -1127,6 +1131,8 @@ async function fetchGSTDetails() {
 
     document.getElementById('formCards').style.display = 'block';
     document.getElementById('prefilledBanner').style.display = 'flex';
+    document.getElementById('progWrap').style.display = '';
+    document.getElementById('progLabel').style.display = '';
     updateProgress();
     setTimeout(() => document.getElementById('formCards').scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
   } finally {
@@ -1166,10 +1172,14 @@ const TRACKED = [
   'pphone','pwhatsapp','pwebsite','phours','pfacebook','pinstagram'
 ];
 
+// Fields auto-filled from registration data (not counted until user edits them)
+const REG_PREFILLED = new Set();
+
 function updateProgress() {
   const filled = TRACKED.filter(id => {
     const el = document.getElementById(id);
-    return el && el.value.trim() !== '';
+    if (!el || REG_PREFILLED.has(id)) return false;
+    return el.value.trim() !== '';
   }).length;
   const pct = Math.round((filled / TRACKED.length) * 100);
   document.getElementById('progBar').style.width = pct + '%';
@@ -1179,7 +1189,7 @@ function updateProgress() {
 
 TRACKED.forEach(id => {
   const el = document.getElementById(id);
-  if (el) el.addEventListener('input', updateProgress);
+  if (el) el.addEventListener('input', () => { REG_PREFILLED.delete(id); updateProgress(); });
 });
 
 // ── Set field ────────────────────────────────────────────────
@@ -1191,9 +1201,12 @@ function setField(id, value) {
 
 // ── Pre-fill form ────────────────────────────────────────────
 function prefillForm(s, d) {
-  setField('pname',          s.name);
-  setField('pcategory',      s.category);
-  setField('pcity',          s.city);
+  if (s.name)     { setField('pname',     s.name);     REG_PREFILLED.add('pname'); }
+  else setField('pname', '');
+  if (s.category) { setField('pcategory', s.category); REG_PREFILLED.add('pcategory'); }
+  else setField('pcategory', '');
+  if (s.city)     { setField('pcity',     s.city);     REG_PREFILLED.add('pcity'); }
+  else setField('pcity', '');
   setField('pstate',         s.state);
   setField('pwebsite',       s.website);
   setField('pphone',         s.contact);
@@ -1215,17 +1228,20 @@ function prefillForm(s, d) {
   setField('pinstagram',     d.instagram_url);
   if (d.gst_number) checkGST(d.gst_number);
   document.getElementById('footName').textContent = s.name || 'Your Business';
-  updateProgress();
 
-  // If seller already has data, skip the gate and show form
-  const hasData = s.name || d.address || d.products_offered;
+  // If seller already has saved business data, skip the gate and show form
+  const hasData = d.address || d.products_offered;
   if (hasData) {
+    REG_PREFILLED.clear();  // returning user: all their data counts toward progress
     document.getElementById('gstQuestionCard').style.display = 'none';
     document.getElementById('formCards').style.display = 'block';
+    document.getElementById('progWrap').style.display = '';
+    document.getElementById('progLabel').style.display = '';
     if (d.gst_number) {
       document.getElementById('gstLookupInput').value = d.gst_number;
     }
   }
+  updateProgress();
 }
 
 // ── Load from DB ─────────────────────────────────────────────
