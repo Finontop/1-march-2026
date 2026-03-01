@@ -3454,9 +3454,7 @@ async function modalFetchGST() {
     setTimeout(() => { _sellerGSTDone = true; _renderModal(); }, 800);
 
   } catch(err) {
-    // Fallback: parse state from GST number
-    const stateName = MODAL_GST_STATES[gstin.substring(0, 2)] || '';
-    if (stateName) document.getElementById('srCity').value = '';
+    // Fallback: on failure, just proceed to manual entry
     status.className = 'gst-modal-status error';
     status.textContent = 'Could not fetch details — proceeding to manual entry.';
     btn.textContent = 'Fetch Details →';
