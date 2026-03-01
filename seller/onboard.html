@@ -1082,6 +1082,29 @@ const GST_STATES = {
   '36':'Telangana','37':'Andhra Pradesh','38':'Ladakh'
 };
 
+// ── Safe fetch helper for GST endpoints ──────────────────────
+async function safeGSTFetch(url, options = {}) {
+  let res;
+  try { res = await fetch(url, options); }
+  catch (e) { return { ok: false, error: 'Network error: ' + e.message }; }
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); }
+  catch {
+    let hint = '';
+    if (res.status === 500) hint = 'Server error. Check PHP logs.';
+    else if (res.status === 502 || res.status === 504) hint = 'Server timeout — try again.';
+    else if (text.includes('Fatal error') || text.includes('Parse error')) hint = 'PHP error on server.';
+    else if (text.includes('<!DOCTYPE') || text.includes('<html')) hint = 'Server returned HTML instead of JSON.';
+    else hint = text.substring(0, 200) || 'Empty response from server.';
+    return { ok: false, error: hint, status: res.status };
+  }
+  if (data && data.success === false) {
+    return { ok: false, error: data.error || 'Request failed', data };
+  }
+  return { ok: true, data };
+}
+
 // ── GST Onboarding Gate ──────────────────────────────────────
 function chooseGST(hasGST) {
   document.getElementById('btnHasGST').classList.toggle('active', hasGST);
@@ -1120,9 +1143,9 @@ async function fetchGSTDetails() {
   status.style.display = 'flex';
 
   try {
-    const res  = await fetch(`${API}gst-captcha.php`);
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Could not load captcha');
+    const result = await safeGSTFetch(`${API}gst-captcha.php`);
+    if (!result.ok) throw new Error(result.error || 'Could not load captcha');
+    const data = result.data;
 
     document.getElementById('gstCaptchaImg').src = data.captcha;
     document.getElementById('gstCaptchaInput').value = '';
@@ -1151,9 +1174,8 @@ async function loadGSTCaptcha() {
   const img = document.getElementById('gstCaptchaImg');
   img.style.opacity = '0.5';
   try {
-    const res  = await fetch(`${API}gst-captcha.php`);
-    const data = await res.json();
-    if (data.success) { img.src = data.captcha; window._gstCaptchaToken = data.token || ''; document.getElementById('gstCaptchaInput').value = ''; }
+    const result = await safeGSTFetch(`${API}gst-captcha.php`);
+    if (result.ok) { img.src = result.data.captcha; window._gstCaptchaToken = result.data.token || ''; document.getElementById('gstCaptchaInput').value = ''; }
   } finally {
     img.style.opacity = '1';
   }
@@ -1175,17 +1197,17 @@ async function verifyGSTCaptcha() {
   status.style.display = 'flex';
 
   try {
-    const res  = await fetch(`${API}gst-lookup.php?gstin=${encodeURIComponent(gstin)}&captcha=${encodeURIComponent(captcha)}&token=${encodeURIComponent(window._gstCaptchaToken || '')}`);
-    const data = await res.json();
+    const result = await safeGSTFetch(`${API}gst-lookup.php?gstin=${encodeURIComponent(gstin)}&captcha=${encodeURIComponent(captcha)}&token=${encodeURIComponent(window._gstCaptchaToken || '')}`);
 
-    if (!data.success) {
-      // Wrong captcha — allow retry
+    if (!result.ok) {
+      // Wrong captcha or lookup error — allow retry
       status.className = 'gst-status error';
-      status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ' + (data.error || 'Incorrect captcha. Please try again.');
+      status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ' + (result.error || 'Incorrect captcha. Please try again.');
       loadGSTCaptcha();
       return;
     }
 
+    const data = result.data;
     const hasRealData = !data.fallback && (data.trade_name || data.legal_name || data.address);
 
     if (hasRealData) {
@@ -1208,7 +1230,7 @@ async function verifyGSTCaptcha() {
       status.style.display = 'flex';
 
       try {
-        const aiRes = await fetch(`${API}gst-ai-parse.php`, {
+        const aiResult = await safeGSTFetch(`${API}gst-ai-parse.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1216,12 +1238,11 @@ async function verifyGSTCaptcha() {
             gst_raw: data
           })
         });
-        const aiData = await aiRes.json();
 
-        if (aiData.success && aiData.parsed) {
-          applyAIParsedData(gstin, aiData.parsed);
+        if (aiResult.ok && aiResult.data.parsed) {
+          applyAIParsedData(gstin, aiResult.data.parsed);
           status.className = 'gst-status success';
-          status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> AI parsed & filled all details!' + statusBadge + (aiData.parsed.saved_to_db ? ' · Saved to database' : '');
+          status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> AI parsed & filled all details!' + statusBadge + (aiResult.data.parsed.saved_to_db ? ' · Saved to database' : '');
         } else {
           // AI failed but basic GST data already applied
           status.className = 'gst-status success';
