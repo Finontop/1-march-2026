@@ -60,6 +60,16 @@ if ($captcha !== '') {
     if (!$cookieJar) {
         $cookieJar = $_SESSION['gst_cookie_jar'] ?? '';
     }
+
+    // If temp file cookie jar is gone, try restoring from session backup
+    if ($cookieJar && !file_exists($cookieJar)) {
+        $backupData  = $_SESSION['gst_cookies_data']  ?? '';
+        $backupToken = $_SESSION['gst_cookies_token']  ?? '';
+        if ($backupData && $backupToken === $token) {
+            @file_put_contents($cookieJar, $backupData);
+        }
+    }
+
     if ($cookieJar && file_exists($cookieJar)) {
         try {
             $postData = json_encode(["gstin" => $gstin, "captcha" => $captcha]);
@@ -67,6 +77,7 @@ if ($captcha !== '') {
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT        => 15,
+                CURLOPT_CONNECTTIMEOUT => 10,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_POST           => true,
                 CURLOPT_POSTFIELDS     => $postData,
@@ -81,8 +92,16 @@ if ($captcha !== '') {
                 CURLOPT_COOKIEFILE     => $cookieJar,
             ]);
             $response = curl_exec($ch);
+            $curlErr   = curl_error($ch);
             $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
+
+            if ($response === false || $curlErr) {
+                // Clean up and report the curl error
+                @unlink($cookieJar);
+                unset($_SESSION['gst_cookie_jar'], $_SESSION['gst_cookies_data'], $_SESSION['gst_cookies_token']);
+                respond(["success" => false, "error" => "GST portal request failed: " . ($curlErr ?: "connection error")]);
+            }
 
             if ($httpCode === 200 && $response) {
                 $d = json_decode($response, true);
@@ -119,17 +138,27 @@ if ($captcha !== '') {
                 } elseif (!empty($d["errorCode"]) || !empty($d["message"])) {
                     // Wrong captcha or GSTIN not found — clean up and return error for UI retry
                     @unlink($cookieJar);
-                    unset($_SESSION['gst_cookie_jar']);
+                    unset($_SESSION['gst_cookie_jar'], $_SESSION['gst_cookies_data'], $_SESSION['gst_cookies_token']);
                     respond(["success" => false, "error" => $d["message"] ?? "Captcha incorrect or GSTIN not found"]);
+                } elseif (!empty($d["error"])) {
+                    @unlink($cookieJar);
+                    unset($_SESSION['gst_cookie_jar'], $_SESSION['gst_cookies_data'], $_SESSION['gst_cookies_token']);
+                    respond(["success" => false, "error" => $d["error"]]);
                 }
+            } elseif ($httpCode >= 400) {
+                @unlink($cookieJar);
+                unset($_SESSION['gst_cookie_jar'], $_SESSION['gst_cookies_data'], $_SESSION['gst_cookies_token']);
+                respond(["success" => false, "error" => "GST portal returned HTTP $httpCode"]);
             }
         } catch (Throwable $e) {
             // Fall through to state-only fallback
-        } finally {
-            // Ensure cookie jar is always cleaned up
-            @unlink($cookieJar);
-            unset($_SESSION['gst_cookie_jar']);
         }
+        // Clean up cookie jar
+        @unlink($cookieJar);
+        unset($_SESSION['gst_cookie_jar'], $_SESSION['gst_cookies_data'], $_SESSION['gst_cookies_token']);
+    } else {
+        // Cookie jar file was missing — captcha session expired
+        respond(["success" => false, "error" => "Captcha session expired. Please refresh the captcha and try again."]);
     }
 }
 
@@ -138,13 +167,13 @@ if ($result) {
     respond([
         "success"       => true,
         "gstin"         => $gstin,
-        "trade_name"    => $result["trade_name"]    ?? $result["TradeName"]    ?? "",
-        "legal_name"    => $result["legal_name"]    ?? $result["LegalName"]    ?? "",
-        "address"       => $result["address"]       ?? $result["Address"]      ?? "",
-        "city"          => $result["city"]           ?? $result["City"]         ?? "",
-        "state"         => $result["state"]          ?? $result["State"]        ?? $stateName,
-        "pincode"       => $result["pincode"]        ?? $result["Pincode"]      ?? "",
-        "business_type" => $result["business_type"]  ?? $result["BusinessType"] ?? "",
+        "trade_name"    => $result["trade_name"]    ?? "",
+        "legal_name"    => $result["legal_name"]    ?? "",
+        "address"       => $result["address"]       ?? "",
+        "city"          => $result["city"]           ?? "",
+        "state"         => $result["state"]          ?? $stateName,
+        "pincode"       => $result["pincode"]        ?? "",
+        "business_type" => $result["business_type"]  ?? "",
         "status"        => $result["status"]         ?? "",
         "nature"        => $result["nature"]         ?? "",
     ]);

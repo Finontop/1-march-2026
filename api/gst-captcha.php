@@ -29,18 +29,23 @@ $ch = curl_init("https://services.gst.gov.in/services/searchtp");
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT        => 15,
+    CURLOPT_CONNECTTIMEOUT => 10,
     CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_USERAGENT      => $ua,
     CURLOPT_SSL_VERIFYPEER => true,
     CURLOPT_COOKIEJAR      => $cookieJar,
     CURLOPT_COOKIEFILE     => $cookieJar,
 ]);
-curl_exec($ch);
+$initBody = curl_exec($ch);
+$initErr  = curl_error($ch);
 $initCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
+if ($initBody === false || $initErr) {
+    respond(["success" => false, "error" => "Could not reach GST portal: " . ($initErr ?: "connection failed")]);
+}
 if ($initCode < 200 || $initCode >= 400) {
-    respond(["success" => false, "error" => "Could not reach GST portal"]);
+    respond(["success" => false, "error" => "GST portal returned HTTP $initCode"]);
 }
 
 // Step 2: Fetch the captcha image using the same cookie jar
@@ -48,6 +53,7 @@ $ch = curl_init("https://services.gst.gov.in/services/captcha");
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT        => 15,
+    CURLOPT_CONNECTTIMEOUT => 10,
     CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_USERAGENT      => $ua,
     CURLOPT_SSL_VERIFYPEER => true,
@@ -58,16 +64,27 @@ curl_setopt_array($ch, [
         "Accept: image/png,image/*,*/*",
     ],
 ]);
-$captchaRaw = curl_exec($ch);
+$captchaRaw  = curl_exec($ch);
+$captchaErr  = curl_error($ch);
 $captchaCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
+if ($captchaRaw === false || $captchaErr) {
+    respond(["success" => false, "error" => "Captcha fetch failed: " . ($captchaErr ?: "connection failed")]);
+}
 if ($captchaCode !== 200 || !$captchaRaw) {
-    respond(["success" => false, "error" => "Could not fetch captcha"]);
+    respond(["success" => false, "error" => "Captcha returned HTTP $captchaCode"]);
 }
 
 // Store the cookie jar path in the session for the lookup step (fallback)
 $_SESSION['gst_cookie_jar'] = $cookieJar;
+
+// Also store the raw cookies in session as a backup in case temp file is deleted
+$cookieData = @file_get_contents($cookieJar);
+if ($cookieData) {
+    $_SESSION['gst_cookies_data'] = $cookieData;
+    $_SESSION['gst_cookies_token'] = $token;
+}
 
 respond([
     "success" => true,
