@@ -1127,6 +1127,7 @@ async function fetchGSTDetails() {
     document.getElementById('gstCaptchaImg').src = data.captcha;
     document.getElementById('gstCaptchaInput').value = '';
     document.getElementById('gstCaptchaSection').style.display = 'block';
+    window._gstCaptchaToken = data.token || '';
     status.style.display = 'none';
     setTimeout(() => document.getElementById('gstCaptchaInput').focus(), 50);
   } catch (err) {
@@ -1152,7 +1153,7 @@ async function loadGSTCaptcha() {
   try {
     const res  = await fetch(`${API}gst-captcha.php`);
     const data = await res.json();
-    if (data.success) { img.src = data.captcha; document.getElementById('gstCaptchaInput').value = ''; }
+    if (data.success) { img.src = data.captcha; window._gstCaptchaToken = data.token || ''; document.getElementById('gstCaptchaInput').value = ''; }
   } finally {
     img.style.opacity = '1';
   }
@@ -1174,7 +1175,7 @@ async function verifyGSTCaptcha() {
   status.style.display = 'flex';
 
   try {
-    const res  = await fetch(`${API}gst-lookup.php?gstin=${encodeURIComponent(gstin)}&captcha=${encodeURIComponent(captcha)}`);
+    const res  = await fetch(`${API}gst-lookup.php?gstin=${encodeURIComponent(gstin)}&captcha=${encodeURIComponent(captcha)}&token=${encodeURIComponent(window._gstCaptchaToken || '')}`);
     const data = await res.json();
 
     if (!data.success) {

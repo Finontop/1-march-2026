@@ -18,6 +18,7 @@ session_start();
 
 $gstin   = trim($_GET["gstin"]   ?? "");
 $captcha = trim($_GET["captcha"] ?? "");
+$token   = trim($_GET["token"]   ?? "");
 
 // Validate GSTIN format: 15-char alphanumeric
 if (!$gstin || !preg_match('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/', $gstin)) {
@@ -48,7 +49,17 @@ $result = null;
 
 // ── Primary: Official GST Portal API with captcha session ──────
 if ($captcha !== '') {
-    $cookieJar = $_SESSION['gst_cookie_jar'] ?? '';
+    // Try token-based cookie jar first, fall back to session
+    $cookieJar = '';
+    if ($token !== '' && preg_match('/^[a-f0-9]{32}$/', $token)) {
+        $tokenJar = sys_get_temp_dir() . '/gst_captcha_' . $token . '.txt';
+        if (file_exists($tokenJar)) {
+            $cookieJar = $tokenJar;
+        }
+    }
+    if (!$cookieJar) {
+        $cookieJar = $_SESSION['gst_cookie_jar'] ?? '';
+    }
     if ($cookieJar && file_exists($cookieJar)) {
         try {
             $postData = json_encode(["gstin" => $gstin, "captcha" => $captcha]);
