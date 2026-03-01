@@ -12,6 +12,8 @@ if (seller) {
 
 document.getElementById("logoutBtn")?.addEventListener("click", () => {
   localStorage.removeItem("seller");
+  localStorage.removeItem("sellerDetails");
+  localStorage.removeItem("lastReport");
   location.href = "../index.html";
 });
 
