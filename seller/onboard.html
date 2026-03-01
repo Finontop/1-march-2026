@@ -1230,15 +1230,24 @@ async function verifyGSTCaptcha() {
 
 // ── Apply GST API Data to Form ───────────────────────────────
 function applyGSTData(gstin, data) {
+  const tradeName = (data.trade_name || '').trim();
+  const legalName = (data.legal_name || '').trim();
+
   setField('pgst',    gstin);
-  setField('pname',   data.trade_name || data.legal_name || '');
+  setField('pname',   tradeName || legalName || '');
   setField('paddress',data.address    || '');
   setField('pcity',   data.city       || '');
   setField('pstate',  data.state      || GST_STATES[gstin.substring(0,2)] || '');
   setField('ppincode',data.pincode    || '');
 
+  // Populate products/services from nature of business (Dealing In Goods and Services)
+  const nature = (data.nature || '').trim();
+  if (nature) {
+    setField('pproducts', nature);
+  }
+
   // Map nature of business / ctb to business type dropdown
-  const nature = (data.nature || '').toLowerCase();
+  const natureLower = nature.toLowerCase();
   const ctb    = (data.business_type || '').toLowerCase();
   const bizMap = [
     { keywords: ['manufactur'],                       value: 'Manufacturer' },
@@ -1250,7 +1259,7 @@ function applyGSTData(gstin, data) {
     { keywords: ['trader', 'trading'],                value: 'Trader' },
     { keywords: ['franchise'],                        value: 'Franchise' },
   ];
-  const combined = nature + ' ' + ctb;
+  const combined = natureLower + ' ' + ctb;
   for (const m of bizMap) {
     if (m.keywords.some(k => combined.includes(k))) {
       setField('pbusinesstype', m.value);
@@ -1259,7 +1268,7 @@ function applyGSTData(gstin, data) {
   }
 
   checkGST(gstin);
-  document.getElementById('footName').textContent = data.trade_name || data.legal_name || 'Your Business';
+  document.getElementById('footName').textContent = tradeName || legalName || 'Your Business';
 }
 
 // ── Fallback: parse from GST number itself ────────────────────

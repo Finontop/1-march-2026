@@ -99,13 +99,19 @@ if ($captcha !== '') {
                         ? $d["pradr"]["adr"]
                         : implode(", ", $addrParts);
 
+                    $tradeName = trim($d["tradeNam"] ?? "");
+                    $legalName = trim($d["lgnm"]     ?? "");
+                    $city      = trim($addr["dst"]   ?? "");
+                    if ($city === '') $city = trim($addr["loc"] ?? "");
+                    if ($city === '') $city = trim($addr["city"] ?? "");
+
                     $result = [
-                        "trade_name"    => $d["tradeNam"] ?? "",
-                        "legal_name"    => $d["lgnm"]     ?? "",
+                        "trade_name"    => $tradeName,
+                        "legal_name"    => $legalName,
                         "address"       => $fullAddress,
                         "state"         => $addr["stcd"]  ?? $stateName,
                         "pincode"       => $addr["pncd"]  ?? "",
-                        "city"          => $addr["dst"]   ?? $addr["loc"] ?? "",
+                        "city"          => $city,
                         "business_type" => $d["ctb"]      ?? "",
                         "status"        => $d["sts"]      ?? "",
                         "nature"        => $d["ntr"]      ?? $d["pradr"]["ntr"] ?? "",
