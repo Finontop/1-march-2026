@@ -3037,6 +3037,22 @@
                    onkeydown="if(event.key==='Enter'){event.preventDefault();modalFetchGST();}">
           </div>
           <button type="button" class="form-submit" id="modalGSTFetchBtn" onclick="modalFetchGST()" disabled>Fetch Details →</button>
+          <!-- Captcha step -->
+          <div id="modalGSTCaptchaSection" style="display:none;margin-top:12px">
+            <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap">
+              <div>
+                <label class="form-label" style="margin-bottom:4px;display:block">Captcha</label>
+                <img id="modalGSTCaptchaImg" src="" alt="Captcha" style="display:block;height:52px;width:auto;border:1px solid var(--border,#ddd);border-radius:6px;background:#fff">
+                <a href="#" style="font-size:11px;color:var(--primary,#2563eb);text-decoration:none;margin-top:3px;display:inline-block" onclick="modalLoadGSTCaptcha(); return false;">↺ Can't read? Refresh</a>
+              </div>
+              <div style="flex:1;min-width:100px">
+                <label class="form-label" style="margin-bottom:4px;display:block">Enter Captcha</label>
+                <input id="modalGSTCaptchaInput" class="form-input" type="text" placeholder="Type captcha" autocomplete="off"
+                       onkeydown="if(event.key==='Enter'){event.preventDefault();modalVerifyGSTCaptcha();}">
+              </div>
+            </div>
+            <button type="button" class="form-submit" id="modalGSTVerifyBtn" onclick="modalVerifyGSTCaptcha()" style="margin-top:10px">Verify &amp; Fetch →</button>
+          </div>
           <div class="gst-modal-status" id="modalGSTStatus"></div>
           <p class="form-footer"><a href="#" onclick="modalChooseGST(false); return false;">Skip — fill details manually instead</a></p>
         </div>
@@ -3437,22 +3453,73 @@ async function modalFetchGST() {
   const btn = document.getElementById('modalGSTFetchBtn');
   const status = document.getElementById('modalGSTStatus');
   btn.disabled = true;
-  btn.textContent = 'Fetching…';
+  btn.textContent = 'Loading…';
   status.className = 'gst-modal-status loading';
-  status.textContent = 'Looking up GST details…';
+  status.textContent = 'Loading captcha…';
 
   try {
-    const res = await fetch(`${API}/gst-lookup.php?gstin=${encodeURIComponent(gstin)}`);
+    const res = await fetch(`${API}/gst-captcha.php`);
     const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Lookup failed');
+    if (!data.success) throw new Error(data.error || 'Could not load captcha');
 
-    // Check if the API returned actual business data or just a fallback
+    document.getElementById('modalGSTCaptchaImg').src = data.captcha;
+    document.getElementById('modalGSTCaptchaInput').value = '';
+    document.getElementById('modalGSTCaptchaSection').style.display = 'block';
+    status.textContent = '';
+    status.className = 'gst-modal-status';
+    setTimeout(() => document.getElementById('modalGSTCaptchaInput').focus(), 50);
+  } catch(err) {
+    status.className = 'gst-modal-status error';
+    status.textContent = 'Could not load captcha — proceeding to manual entry.';
+    btn.textContent = 'Fetch Details →';
+    btn.disabled = false;
+    setTimeout(() => { _sellerGSTDone = true; _renderModal(); }, 1200);
+  } finally {
+    btn.textContent = 'Fetch Details →';
+  }
+}
+
+async function modalLoadGSTCaptcha() {
+  const img = document.getElementById('modalGSTCaptchaImg');
+  img.style.opacity = '0.5';
+  try {
+    const res  = await fetch(`${API}/gst-captcha.php`);
+    const data = await res.json();
+    if (data.success) { img.src = data.captcha; document.getElementById('modalGSTCaptchaInput').value = ''; }
+  } finally {
+    img.style.opacity = '1';
+  }
+}
+
+async function modalVerifyGSTCaptcha() {
+  const gstin   = document.getElementById('modalGSTInput').value.trim();
+  const captcha = document.getElementById('modalGSTCaptchaInput').value.trim();
+  if (!captcha) { document.getElementById('modalGSTStatus').className = 'gst-modal-status error'; document.getElementById('modalGSTStatus').textContent = 'Please enter the captcha text.'; return; }
+
+  const btn = document.getElementById('modalGSTVerifyBtn');
+  const status = document.getElementById('modalGSTStatus');
+  btn.disabled = true;
+  btn.textContent = 'Verifying…';
+  status.className = 'gst-modal-status loading';
+  status.textContent = 'Fetching GST details…';
+
+  try {
+    const res = await fetch(`${API}/gst-lookup.php?gstin=${encodeURIComponent(gstin)}&captcha=${encodeURIComponent(captcha)}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      status.className = 'gst-modal-status error';
+      status.textContent = data.error || 'Incorrect captcha. Please try again.';
+      modalLoadGSTCaptcha();
+      return;
+    }
+
     const hasRealData = !data.fallback && (data.trade_name || data.legal_name || data.address);
 
-    // Pre-fill registration form with GST data
     if (data.legal_name) document.getElementById('srName').value = data.legal_name;
     if (data.city) document.getElementById('srCity').value = data.city;
 
+    document.getElementById('modalGSTCaptchaSection').style.display = 'none';
     if (hasRealData) {
       status.className = 'gst-modal-status success';
       status.textContent = '✓ GST verified! Proceeding to registration…';
@@ -3463,12 +3530,13 @@ async function modalFetchGST() {
     setTimeout(() => { _sellerGSTDone = true; _renderModal(); }, 800);
 
   } catch(err) {
-    // Fallback: on failure, just proceed to manual entry
     status.className = 'gst-modal-status error';
-    status.textContent = 'Could not fetch details — proceeding to manual entry.';
-    btn.textContent = 'Fetch Details →';
-    btn.disabled = false;
+    status.textContent = 'Could not reach lookup service — proceeding to manual entry.';
+    document.getElementById('modalGSTCaptchaSection').style.display = 'none';
     setTimeout(() => { _sellerGSTDone = true; _renderModal(); }, 1200);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Verify & Fetch →';
   }
 }
 

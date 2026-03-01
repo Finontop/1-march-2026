@@ -14,7 +14,10 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
 
 function respond($d) { ob_end_clean(); echo json_encode($d); exit; }
 
-$gstin = trim($_GET["gstin"] ?? "");
+session_start();
+
+$gstin   = trim($_GET["gstin"]   ?? "");
+$captcha = trim($_GET["captcha"] ?? "");
 
 // Validate GSTIN format: 15-char alphanumeric
 if (!$gstin || !preg_match('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/', $gstin)) {
@@ -41,95 +44,75 @@ $gstStates = [
 $stateCode = substr($gstin, 0, 2);
 $stateName = $gstStates[$stateCode] ?? '';
 
-// ── Primary: Official GST Portal API (services.gst.gov.in) ─────
 $result = null;
 
-try {
-    $govUrl = "https://services.gst.gov.in/services/api/search/taxpayerByGstin/" . urlencode($gstin);
-    $ch = curl_init($govUrl);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 10,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTPHEADER     => [
-            "Accept: application/json",
-            "Content-Type: application/json",
-        ],
-        CURLOPT_USERAGENT      => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    ]);
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($httpCode === 200 && $response) {
-        $d = json_decode($response, true);
-        if (!empty($d) && !empty($d["gstin"])) {
-            // Build full address from addr sub-fields
-            $addr = $d["pradr"]["addr"] ?? [];
-            $addrParts = array_filter([
-                $addr["bno"] ?? "",   // building number
-                $addr["bnm"] ?? "",   // building name
-                $addr["flno"] ?? "",  // floor number
-                $addr["st"] ?? "",    // street
-                $addr["loc"] ?? "",   // locality
+// ── Primary: Official GST Portal API with captcha session ──────
+if ($captcha !== '') {
+    $cookieJar = $_SESSION['gst_cookie_jar'] ?? '';
+    if ($cookieJar && file_exists($cookieJar)) {
+        try {
+            $postData = json_encode(["gstin" => $gstin, "captcha" => $captcha]);
+            $ch = curl_init("https://services.gst.gov.in/services/api/search/taxpayerDetails");
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT        => 15,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $postData,
+                CURLOPT_HTTPHEADER     => [
+                    "Content-Type: application/json",
+                    "Accept: application/json",
+                    "Referer: https://services.gst.gov.in/services/searchtp",
+                ],
+                CURLOPT_USERAGENT      => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_COOKIEJAR      => $cookieJar,
+                CURLOPT_COOKIEFILE     => $cookieJar,
             ]);
-            $fullAddress = !empty($d["pradr"]["adr"])
-                ? $d["pradr"]["adr"]
-                : implode(", ", $addrParts);
+            $response = curl_exec($ch);
+            $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
 
-            $result = [
-                "trade_name"    => $d["tradeNam"] ?? "",
-                "legal_name"    => $d["lgnm"] ?? "",
-                "address"       => $fullAddress,
-                "state"         => $addr["stcd"] ?? $stateName,
-                "pincode"       => $addr["pncd"] ?? "",
-                "city"          => $addr["dst"] ?? $addr["loc"] ?? "",
-                "business_type" => $d["ctb"] ?? "",
-                "status"        => $d["sts"] ?? "",
-                "nature"        => $d["ntr"] ?? $d["pradr"]["ntr"] ?? "",
-            ];
-        }
-    }
-} catch (Throwable $e) {
-    // Silently fall through to fallback
-}
+            if ($httpCode === 200 && $response) {
+                $d = json_decode($response, true);
+                if (!empty($d) && !empty($d["gstin"])) {
+                    $addr = $d["pradr"]["addr"] ?? [];
+                    $addrParts = array_filter([
+                        $addr["bno"]  ?? "",
+                        $addr["bnm"]  ?? "",
+                        $addr["flno"] ?? "",
+                        $addr["st"]   ?? "",
+                        $addr["loc"]  ?? "",
+                    ]);
+                    $fullAddress = !empty($d["pradr"]["adr"])
+                        ? $d["pradr"]["adr"]
+                        : implode(", ", $addrParts);
 
-// ── Secondary: Masters India public API (fallback) ─────────────
-if (!$result) {
-    try {
-        $altUrl = "https://commonapi.mastersindia.co/commonapis/searchgstin?gstin=" . urlencode($gstin);
-        $ch = curl_init($altUrl);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 8,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTPHEADER     => [
-                "Accept: application/json",
-                "Content-Type: application/json",
-            ],
-            CURLOPT_USERAGENT      => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        ]);
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpCode === 200 && $response) {
-            $data = json_decode($response, true);
-            $d = $data["data"] ?? $data ?? null;
-            if (!empty($d) && (!empty($d["tradeNam"]) || !empty($d["lgnm"]) || !empty($d["tradeName"]) || !empty($d["legalName"]))) {
-                $result = [
-                    "trade_name"    => $d["tradeNam"] ?? $d["tradeName"] ?? "",
-                    "legal_name"    => $d["lgnm"] ?? $d["legalName"] ?? "",
-                    "address"       => $d["pradr"]["adr"] ?? $d["address"] ?? "",
-                    "state"         => $d["pradr"]["addr"]["stcd"] ?? $stateName,
-                    "pincode"       => $d["pradr"]["addr"]["pncd"] ?? "",
-                    "city"          => $d["pradr"]["addr"]["dst"] ?? "",
-                    "business_type" => $d["ctb"] ?? $d["constitutionOfBusiness"] ?? "",
-                ];
+                    $result = [
+                        "trade_name"    => $d["tradeNam"] ?? "",
+                        "legal_name"    => $d["lgnm"]     ?? "",
+                        "address"       => $fullAddress,
+                        "state"         => $addr["stcd"]  ?? $stateName,
+                        "pincode"       => $addr["pncd"]  ?? "",
+                        "city"          => $addr["dst"]   ?? $addr["loc"] ?? "",
+                        "business_type" => $d["ctb"]      ?? "",
+                        "status"        => $d["sts"]      ?? "",
+                        "nature"        => $d["ntr"]      ?? $d["pradr"]["ntr"] ?? "",
+                    ];
+                } elseif (!empty($d["errorCode"]) || !empty($d["message"])) {
+                    // Wrong captcha or GSTIN not found — clean up and return error for UI retry
+                    @unlink($cookieJar);
+                    unset($_SESSION['gst_cookie_jar']);
+                    respond(["success" => false, "error" => $d["message"] ?? "Captcha incorrect or GSTIN not found"]);
+                }
             }
+        } catch (Throwable $e) {
+            // Fall through to state-only fallback
+        } finally {
+            // Ensure cookie jar is always cleaned up
+            @unlink($cookieJar);
+            unset($_SESSION['gst_cookie_jar']);
         }
-    } catch (Throwable $e) {
-        // Silently fall through to fallback
     }
 }
 
