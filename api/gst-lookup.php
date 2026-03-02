@@ -16,10 +16,11 @@ function respond($d) { ob_end_clean(); echo json_encode($d); exit; }
 
 // Accept POST with JSON body (stateless cookie transfer)
 $input = json_decode(file_get_contents("php://input"), true);
+if (!$input || !is_array($input)) $input = [];
 
-$gstin        = trim($input["gstin"]        ?? $_GET["gstin"]   ?? "");
-$captcha      = trim($input["captcha"]      ?? $_GET["captcha"] ?? "");
-$token        = trim($input["token"]        ?? $_GET["token"]   ?? "");
+$gstin        = trim($input["gstin"]        ?? "");
+$captcha      = trim($input["captcha"]      ?? "");
+$token        = trim($input["token"]        ?? "");
 $sessionData  = trim($input["session_data"] ?? "");
 
 // Validate GSTIN format: 15-char alphanumeric
