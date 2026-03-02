@@ -14,14 +14,11 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
 
 function respond($d) { ob_end_clean(); echo json_encode($d); exit; }
 
-// Accept POST with JSON body (stateless cookie transfer)
+// Accept POST with JSON body
 $input = json_decode(file_get_contents("php://input"), true);
 if (!$input || !is_array($input)) $input = [];
 
-$gstin        = trim($input["gstin"]        ?? "");
-$captcha      = trim($input["captcha"]      ?? "");
-$token        = trim($input["token"]        ?? "");
-$sessionData  = trim($input["session_data"] ?? "");
+$gstin = trim($input["gstin"] ?? "");
 
 // Validate GSTIN format: 15-char alphanumeric
 if (!$gstin || !preg_match('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/', $gstin)) {
@@ -48,112 +45,117 @@ $gstStates = [
 $stateCode = substr($gstin, 0, 2);
 $stateName = $gstStates[$stateCode] ?? '';
 
+$ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
 $result = null;
 
-// ── Primary: Official GST Portal API with captcha session ──────
-if ($captcha !== '') {
-    // Restore cookie jar from session_data sent by the frontend (stateless approach)
-    $cookieJar = '';
-    if ($sessionData !== '') {
-        $cookieContent = @base64_decode($sessionData, true);
-        if ($cookieContent !== false && strlen($cookieContent) > 0) {
-            $safeToken = ($token !== '' && preg_match('/^[a-f0-9]{32}$/', $token)) ? $token : bin2hex(random_bytes(16));
-            $cookieJar = sys_get_temp_dir() . '/gst_captcha_' . $safeToken . '.txt';
-            @file_put_contents($cookieJar, $cookieContent);
-        }
-    }
+// ── Primary: Pinelabs GST Search API (no captcha needed) ───────
+try {
+    $ch = curl_init("https://www.pinelabs.com/api/gst-number-search");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode(["gstin" => $gstin]),
+        CURLOPT_HTTPHEADER     => [
+            "Content-Type: application/json",
+            "Accept: application/json",
+            "Referer: https://www.pinelabs.com/gst-number-search",
+            "Origin: https://www.pinelabs.com",
+        ],
+        CURLOPT_USERAGENT      => $ua,
+        CURLOPT_SSL_VERIFYPEER => true,
+    ]);
+    $response = curl_exec($ch);
+    $curlErr  = curl_error($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-    // Fallback: try token-based temp file (in case it still exists)
-    if (!$cookieJar && $token !== '' && preg_match('/^[a-f0-9]{32}$/', $token)) {
-        $tokenJar = sys_get_temp_dir() . '/gst_captcha_' . $token . '.txt';
-        if (file_exists($tokenJar)) {
-            $cookieJar = $tokenJar;
-        }
-    }
+    if ($response !== false && !$curlErr && $httpCode === 200 && $response) {
+        $d = json_decode($response, true);
 
-    if ($cookieJar && file_exists($cookieJar)) {
-        try {
-            $postData = json_encode(["gstin" => $gstin, "captcha" => $captcha]);
-            $ch = curl_init("https://services.gst.gov.in/services/api/search/taxpayerDetails");
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT        => 15,
-                CURLOPT_CONNECTTIMEOUT => 10,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_POST           => true,
-                CURLOPT_POSTFIELDS     => $postData,
-                CURLOPT_HTTPHEADER     => [
-                    "Content-Type: application/json",
-                    "Accept: application/json",
-                    "Referer: https://services.gst.gov.in/services/searchtp",
-                ],
-                CURLOPT_USERAGENT      => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_COOKIEJAR      => $cookieJar,
-                CURLOPT_COOKIEFILE     => $cookieJar,
-            ]);
-            $response = curl_exec($ch);
-            $curlErr   = curl_error($ch);
-            $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
+        // Handle Pinelabs response format
+        $gstData = $d["data"] ?? $d;
 
-            if ($response === false || $curlErr) {
-                @unlink($cookieJar);
-                respond(["success" => false, "error" => "GST portal request failed: " . ($curlErr ?: "connection error")]);
+        if (!empty($gstData) && is_array($gstData)) {
+            $tradeName = trim(
+                $gstData["tradeName"] ?? $gstData["trade_name"] ?? $gstData["tradeNam"] ?? ""
+            );
+            $legalName = trim(
+                $gstData["legalNameOfBusiness"] ?? $gstData["legal_name"] ?? $gstData["lgnm"] ?? ""
+            );
+            $address = trim(
+                $gstData["principalPlaceAddress"] ?? $gstData["address"] ?? ""
+            );
+            // Try nested address object
+            if ($address === '' && isset($gstData["pradr"])) {
+                $addr = $gstData["pradr"]["addr"] ?? $gstData["pradr"] ?? [];
+                $addrParts = array_filter([
+                    $addr["bno"]  ?? "", $addr["bnm"]  ?? "",
+                    $addr["flno"] ?? "", $addr["st"]   ?? "",
+                    $addr["loc"]  ?? "",
+                ]);
+                $address = !empty($gstData["pradr"]["adr"])
+                    ? $gstData["pradr"]["adr"]
+                    : implode(", ", $addrParts);
             }
 
-            if ($httpCode === 200 && $response) {
-                $d = json_decode($response, true);
-                if (!empty($d) && !empty($d["gstin"])) {
-                    $addr = $d["pradr"]["addr"] ?? [];
-                    $addrParts = array_filter([
-                        $addr["bno"]  ?? "",
-                        $addr["bnm"]  ?? "",
-                        $addr["flno"] ?? "",
-                        $addr["st"]   ?? "",
-                        $addr["loc"]  ?? "",
-                    ]);
-                    $fullAddress = !empty($d["pradr"]["adr"])
-                        ? $d["pradr"]["adr"]
-                        : implode(", ", $addrParts);
-
-                    $tradeName = trim($d["tradeNam"] ?? "");
-                    $legalName = trim($d["lgnm"]     ?? "");
-                    $city      = trim($addr["dst"]   ?? "");
-                    if ($city === '') $city = trim($addr["loc"] ?? "");
-                    if ($city === '') $city = trim($addr["city"] ?? "");
-
-                    $result = [
-                        "trade_name"    => $tradeName,
-                        "legal_name"    => $legalName,
-                        "address"       => $fullAddress,
-                        "state"         => $addr["stcd"]  ?? $stateName,
-                        "pincode"       => $addr["pncd"]  ?? "",
-                        "city"          => $city,
-                        "business_type" => $d["ctb"]      ?? "",
-                        "status"        => $d["sts"]      ?? "",
-                        "nature"        => $d["ntr"]      ?? $d["pradr"]["ntr"] ?? "",
-                    ];
-                } elseif (!empty($d["errorCode"]) || !empty($d["message"])) {
-                    @unlink($cookieJar);
-                    respond(["success" => false, "error" => $d["message"] ?? "Captcha incorrect or GSTIN not found"]);
-                } elseif (!empty($d["error"])) {
-                    @unlink($cookieJar);
-                    respond(["success" => false, "error" => $d["error"]]);
-                }
-            } elseif ($httpCode >= 400) {
-                @unlink($cookieJar);
-                respond(["success" => false, "error" => "GST portal returned HTTP $httpCode"]);
+            $state = trim(
+                $gstData["state"] ?? $gstData["stateJurisdiction"] ?? ""
+            );
+            if ($state === '' && isset($gstData["pradr"]["addr"]["stcd"])) {
+                $state = $gstData["pradr"]["addr"]["stcd"];
             }
-        } catch (Throwable $e) {
-            // Fall through to state-only fallback
+            if ($state === '') $state = $stateName;
+
+            $city = trim($gstData["city"] ?? "");
+            if ($city === '' && isset($gstData["pradr"]["addr"])) {
+                $addr = $gstData["pradr"]["addr"];
+                $city = trim($addr["dst"] ?? $addr["loc"] ?? $addr["city"] ?? "");
+            }
+            // Try extracting city from address object
+            if ($city === '' && isset($gstData["address"]) && is_array($gstData["address"])) {
+                $city = trim($gstData["address"]["city"] ?? $gstData["address"]["district"] ?? "");
+            }
+
+            $pincode = trim($gstData["pincode"] ?? "");
+            if ($pincode === '' && isset($gstData["pradr"]["addr"]["pncd"])) {
+                $pincode = $gstData["pradr"]["addr"]["pncd"];
+            }
+            if ($pincode === '' && isset($gstData["address"]) && is_array($gstData["address"])) {
+                $pincode = trim($gstData["address"]["pincode"] ?? "");
+            }
+
+            $nature = $gstData["natureOfBusiness"] ?? $gstData["nature"] ?? $gstData["ntr"] ?? "";
+            if (is_array($nature)) $nature = implode(", ", $nature);
+
+            $businessType = trim(
+                $gstData["constitutionOfBusiness"] ?? $gstData["business_type"] ?? $gstData["ctb"] ?? ""
+            );
+
+            $status = trim(
+                $gstData["gstnStatus"] ?? $gstData["status"] ?? $gstData["sts"] ?? ""
+            );
+
+            if ($tradeName || $legalName || $address) {
+                $result = [
+                    "trade_name"    => $tradeName,
+                    "legal_name"    => $legalName,
+                    "address"       => $address,
+                    "state"         => $state,
+                    "pincode"       => $pincode,
+                    "city"          => $city,
+                    "business_type" => $businessType,
+                    "status"        => $status,
+                    "nature"        => $nature,
+                ];
+            }
         }
-        // Clean up cookie jar
-        @unlink($cookieJar);
-    } else {
-        // No cookie data available — captcha session expired
-        respond(["success" => false, "error" => "Captcha session expired. Please refresh the captcha and try again."]);
     }
+} catch (Throwable $e) {
+    // Fall through to fallback
 }
 
 // Return whatever we have
@@ -161,13 +163,13 @@ if ($result) {
     respond([
         "success"       => true,
         "gstin"         => $gstin,
-        "trade_name"    => $result["trade_name"]    ?? $result["TradeName"]    ?? "",
-        "legal_name"    => $result["legal_name"]    ?? $result["LegalName"]    ?? "",
-        "address"       => $result["address"]       ?? $result["Address"]      ?? "",
-        "city"          => $result["city"]           ?? $result["City"]         ?? "",
-        "state"         => $result["state"]          ?? $result["State"]        ?? $stateName,
-        "pincode"       => $result["pincode"]        ?? $result["Pincode"]      ?? "",
-        "business_type" => $result["business_type"]  ?? $result["BusinessType"] ?? "",
+        "trade_name"    => $result["trade_name"]    ?? "",
+        "legal_name"    => $result["legal_name"]    ?? "",
+        "address"       => $result["address"]       ?? "",
+        "city"          => $result["city"]           ?? "",
+        "state"         => $result["state"]          ?? $stateName,
+        "pincode"       => $result["pincode"]        ?? "",
+        "business_type" => $result["business_type"]  ?? "",
         "status"        => $result["status"]         ?? "",
         "nature"        => $result["nature"]         ?? "",
     ]);

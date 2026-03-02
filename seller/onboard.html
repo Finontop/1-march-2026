@@ -775,24 +775,7 @@
         <span id="fetchBtnTxt">Fetch Details →</span>
       </button>
     </div>
-    <!-- Captcha step (shown after clicking Fetch Details) -->
-    <div id="gstCaptchaSection" style="display:none;margin-top:12px">
-      <div class="gst-lookup-wrap" style="align-items:flex-end;gap:12px;flex-wrap:wrap">
-        <div class="form-group" style="margin:0;flex:0 0 auto">
-          <label>Captcha <span class="b-req">Required</span></label>
-          <img id="gstCaptchaImg" src="" alt="Captcha" style="display:block;height:52px;width:auto;border:1px solid var(--border);border-radius:6px;background:#fff;margin-top:4px">
-          <a href="#" style="font-size:11px;color:var(--primary);text-decoration:none;margin-top:3px;display:inline-block" onclick="loadGSTCaptcha(); return false;">↺ Can't read? Refresh</a>
-        </div>
-        <div class="form-group" style="margin:0;flex:1;min-width:120px">
-          <label>Enter Captcha</label>
-          <input type="text" id="gstCaptchaInput" placeholder="Type captcha here" autocomplete="off"
-                 onkeydown="if(event.key==='Enter'){event.preventDefault();verifyGSTCaptcha();}">
-        </div>
-        <button type="button" class="btn-fetch" id="gstVerifyBtn" onclick="verifyGSTCaptcha()">
-          Verify &amp; Fetch →
-        </button>
-      </div>
-    </div>
+
     <div class="gst-status" id="gstLookupStatus"></div>
     <p class="manual-link">Can't find it? <a href="#" onclick="chooseGST(false); return false;">Fill details manually instead</a></p>
   </div>
@@ -1126,7 +1109,7 @@ function chooseGST(hasGST) {
   }
 }
 
-// ── Fetch GST Details (Step 1: load captcha) ─────────────────
+// ── Fetch GST Details (via Pinelabs — no captcha needed) ─────
 async function fetchGSTDetails() {
   const gstin = document.getElementById('gstLookupInput').value.trim();
   if (!GST_REGEX.test(gstin)) {
@@ -1138,62 +1121,7 @@ async function fetchGSTDetails() {
   const status = document.getElementById('gstLookupStatus');
 
   btn.disabled = true;
-  document.getElementById('fetchBtnTxt').textContent = 'Loading…';
-  status.className = 'gst-status loading';
-  status.innerHTML = '<div class="gst-mini-spin"></div> Loading captcha…';
-  status.style.display = 'flex';
-
-  try {
-    const result = await safeGSTFetch(`${API}gst-captcha.php`);
-    if (!result.ok) throw new Error(result.error || 'Could not load captcha');
-    const data = result.data;
-
-    document.getElementById('gstCaptchaImg').src = data.captcha;
-    document.getElementById('gstCaptchaInput').value = '';
-    document.getElementById('gstCaptchaSection').style.display = 'block';
-    window._gstCaptchaToken = data.token || '';
-    window._gstSessionData = data.session_data || '';
-    status.style.display = 'none';
-    setTimeout(() => document.getElementById('gstCaptchaInput').focus(), 50);
-  } catch (err) {
-    applyGSTFallback(gstin);
-    status.className = 'gst-status error';
-    status.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Could not load captcha — filled what we could from the GST number. Please complete the rest manually.`;
-    document.getElementById('formCards').style.display = 'block';
-    document.getElementById('prefilledBanner').style.display = 'none';
-    document.getElementById('progWrap').style.display = '';
-    document.getElementById('progLabel').style.display = '';
-    updateProgress();
-    setTimeout(() => document.getElementById('formCards').scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-  } finally {
-    btn.disabled = false;
-    document.getElementById('fetchBtnTxt').textContent = 'Fetch Details →';
-  }
-}
-
-// ── Reload captcha ────────────────────────────────────────────
-async function loadGSTCaptcha() {
-  const img = document.getElementById('gstCaptchaImg');
-  img.style.opacity = '0.5';
-  try {
-    const result = await safeGSTFetch(`${API}gst-captcha.php`);
-    if (result.ok) { img.src = result.data.captcha; window._gstCaptchaToken = result.data.token || ''; window._gstSessionData = result.data.session_data || ''; document.getElementById('gstCaptchaInput').value = ''; }
-  } finally {
-    img.style.opacity = '1';
-  }
-}
-
-// ── Verify captcha and fetch GST data (Step 2) ───────────────
-async function verifyGSTCaptcha() {
-  const gstin   = document.getElementById('gstLookupInput').value.trim();
-  const captcha = document.getElementById('gstCaptchaInput').value.trim();
-  if (!captcha) { toast('Enter the captcha text', 2000, 'error'); return; }
-
-  const btn    = document.getElementById('gstVerifyBtn');
-  const status = document.getElementById('gstLookupStatus');
-
-  btn.disabled = true;
-  btn.textContent = 'Verifying…';
+  document.getElementById('fetchBtnTxt').textContent = 'Fetching…';
   status.className = 'gst-status loading';
   status.innerHTML = '<div class="gst-mini-spin"></div> Fetching GST details…';
   status.style.display = 'flex';
@@ -1202,19 +1130,19 @@ async function verifyGSTCaptcha() {
     const result = await safeGSTFetch(`${API}gst-lookup.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        gstin: gstin,
-        captcha: captcha,
-        token: window._gstCaptchaToken || '',
-        session_data: window._gstSessionData || ''
-      })
+      body: JSON.stringify({ gstin: gstin })
     });
 
     if (!result.ok) {
-      // Wrong captcha or lookup error — allow retry
+      applyGSTFallback(gstin);
       status.className = 'gst-status error';
-      status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ' + (result.error || 'Incorrect captcha. Please try again.');
-      loadGSTCaptcha();
+      status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ' + (result.error || 'Could not fetch details. Please try again.');
+      document.getElementById('formCards').style.display = 'block';
+      document.getElementById('prefilledBanner').style.display = 'none';
+      document.getElementById('progWrap').style.display = '';
+      document.getElementById('progLabel').style.display = '';
+      updateProgress();
+      setTimeout(() => document.getElementById('formCards').scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
       return;
     }
 
@@ -1224,7 +1152,6 @@ async function verifyGSTCaptcha() {
     if (hasRealData) {
       // Immediately fill basic fields from GST data
       applyGSTData(gstin, data);
-      document.getElementById('gstCaptchaSection').style.display = 'none';
       const safeStatus = (data.status || '').replace(/[<>&"']/g, '');
       const statusBadge = safeStatus ? ` · GST Status: <strong>${safeStatus}</strong>` : '';
 
@@ -1269,7 +1196,6 @@ async function verifyGSTCaptcha() {
       setTimeout(() => document.getElementById('formCards').scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     } else {
       applyGSTFallback(gstin);
-      document.getElementById('gstCaptchaSection').style.display = 'none';
       status.className = 'gst-status error';
       status.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Could not fetch business details — filled state from GST number. Please complete the rest manually.';
       document.getElementById('formCards').style.display = 'block';
@@ -1282,7 +1208,6 @@ async function verifyGSTCaptcha() {
 
   } catch (err) {
     applyGSTFallback(gstin);
-    document.getElementById('gstCaptchaSection').style.display = 'none';
     status.className = 'gst-status error';
     status.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Could not reach lookup service — filled what we could from the GST number. Please complete the rest manually.`;
     document.getElementById('formCards').style.display = 'block';
@@ -1293,7 +1218,7 @@ async function verifyGSTCaptcha() {
     setTimeout(() => document.getElementById('formCards').scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Verify & Fetch →';
+    document.getElementById('fetchBtnTxt').textContent = 'Fetch Details →';
   }
 }
 
