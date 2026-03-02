@@ -3442,7 +3442,7 @@ async function modalFetchGST() {
   status.textContent = 'Fetching GST details…';
 
   try {
-    const res = await fetch(`${API}/gst-lookup.php`, {
+    const res = await fetch(`${API}gst-lookup.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ gstin: gstin })
