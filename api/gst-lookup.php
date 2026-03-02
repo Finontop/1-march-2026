@@ -49,21 +49,76 @@ $ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like
 
 $result = null;
 
-// ── Primary: Pinelabs GST Search API (no captcha needed) ───────
+// Helper: parse GST portal response format (used by both primary and secondary)
+function parseGstPortalData($gstData, $stateName) {
+    $tradeName = trim($gstData["tradeNam"] ?? "");
+    $legalName = trim($gstData["lgnm"] ?? "");
+
+    $address = "";
+    if (!empty($gstData["pradr"]["adr"])) {
+        $address = trim($gstData["pradr"]["adr"]);
+    } elseif (isset($gstData["pradr"]["addr"])) {
+        $addr = $gstData["pradr"]["addr"];
+        $addrParts = array_filter([
+            $addr["bno"]  ?? "", $addr["flno"] ?? "", $addr["bnm"] ?? "",
+            $addr["st"]   ?? "", $addr["loc"]  ?? "", $addr["dst"] ?? "",
+        ]);
+        $address = implode(", ", $addrParts);
+    }
+
+    $state = "";
+    if (isset($gstData["pradr"]["addr"]["stcd"])) {
+        $state = trim($gstData["pradr"]["addr"]["stcd"]);
+    }
+    if ($state === '' && !empty($gstData["stj"])) {
+        $stj = $gstData["stj"];
+        $state = trim(explode(" - ", $stj)[0]);
+    }
+    if ($state === '') $state = $stateName;
+
+    $city = "";
+    if (isset($gstData["pradr"]["addr"])) {
+        $addr = $gstData["pradr"]["addr"];
+        $city = trim($addr["dst"] ?? $addr["loc"] ?? "");
+    }
+
+    $pincode = trim($gstData["pradr"]["addr"]["pncd"] ?? "");
+
+    $nature = $gstData["ntr"] ?? "";
+    if (is_array($nature)) $nature = implode(", ", $nature);
+
+    $businessType = trim($gstData["ctb"] ?? "");
+    $status       = trim($gstData["sts"] ?? "");
+
+    if ($tradeName || $legalName || $address) {
+        return [
+            "trade_name"    => $tradeName,
+            "legal_name"    => $legalName,
+            "address"       => $address,
+            "state"         => $state,
+            "pincode"       => $pincode,
+            "city"          => $city,
+            "business_type" => $businessType,
+            "status"        => $status,
+            "nature"        => $nature,
+        ];
+    }
+    return null;
+}
+
+// ── Primary: Official GST portal public JSON API ───────────────
 try {
-    $ch = curl_init("https://www.pinelabs.com/api/gst-number-search");
+    $ch = curl_init("https://services.gst.gov.in/services/api/search/taxpayerByGstin/" . urlencode($gstin));
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT        => 15,
         CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => json_encode(["gstin" => $gstin]),
+        CURLOPT_HTTPGET        => true,
         CURLOPT_HTTPHEADER     => [
-            "Content-Type: application/json",
             "Accept: application/json",
-            "Referer: https://www.pinelabs.com/gst-number-search",
-            "Origin: https://www.pinelabs.com",
+            "Referer: https://services.gst.gov.in/services/searchtp",
+            "Origin: https://services.gst.gov.in",
         ],
         CURLOPT_USERAGENT      => $ua,
         CURLOPT_SSL_VERIFYPEER => true,
@@ -75,87 +130,44 @@ try {
 
     if ($response !== false && !$curlErr && $httpCode === 200 && $response) {
         $d = json_decode($response, true);
-
-        // Handle Pinelabs response format
-        $gstData = $d["data"] ?? $d;
-
-        if (!empty($gstData) && is_array($gstData)) {
-            $tradeName = trim(
-                $gstData["tradeName"] ?? $gstData["trade_name"] ?? $gstData["tradeNam"] ?? ""
-            );
-            $legalName = trim(
-                $gstData["legalNameOfBusiness"] ?? $gstData["legal_name"] ?? $gstData["lgnm"] ?? ""
-            );
-            $address = trim(
-                $gstData["principalPlaceAddress"] ?? $gstData["address"] ?? ""
-            );
-            // Try nested address object
-            if ($address === '' && isset($gstData["pradr"])) {
-                $addr = $gstData["pradr"]["addr"] ?? $gstData["pradr"] ?? [];
-                $addrParts = array_filter([
-                    $addr["bno"]  ?? "", $addr["bnm"]  ?? "",
-                    $addr["flno"] ?? "", $addr["st"]   ?? "",
-                    $addr["loc"]  ?? "",
-                ]);
-                $address = !empty($gstData["pradr"]["adr"])
-                    ? $gstData["pradr"]["adr"]
-                    : implode(", ", $addrParts);
-            }
-
-            $state = trim(
-                $gstData["state"] ?? $gstData["stateJurisdiction"] ?? ""
-            );
-            if ($state === '' && isset($gstData["pradr"]["addr"]["stcd"])) {
-                $state = $gstData["pradr"]["addr"]["stcd"];
-            }
-            if ($state === '') $state = $stateName;
-
-            $city = trim($gstData["city"] ?? "");
-            if ($city === '' && isset($gstData["pradr"]["addr"])) {
-                $addr = $gstData["pradr"]["addr"];
-                $city = trim($addr["dst"] ?? $addr["loc"] ?? $addr["city"] ?? "");
-            }
-            // Try extracting city from address object
-            if ($city === '' && isset($gstData["address"]) && is_array($gstData["address"])) {
-                $city = trim($gstData["address"]["city"] ?? $gstData["address"]["district"] ?? "");
-            }
-
-            $pincode = trim($gstData["pincode"] ?? "");
-            if ($pincode === '' && isset($gstData["pradr"]["addr"]["pncd"])) {
-                $pincode = $gstData["pradr"]["addr"]["pncd"];
-            }
-            if ($pincode === '' && isset($gstData["address"]) && is_array($gstData["address"])) {
-                $pincode = trim($gstData["address"]["pincode"] ?? "");
-            }
-
-            $nature = $gstData["natureOfBusiness"] ?? $gstData["nature"] ?? $gstData["ntr"] ?? "";
-            if (is_array($nature)) $nature = implode(", ", $nature);
-
-            $businessType = trim(
-                $gstData["constitutionOfBusiness"] ?? $gstData["business_type"] ?? $gstData["ctb"] ?? ""
-            );
-
-            $status = trim(
-                $gstData["gstnStatus"] ?? $gstData["status"] ?? $gstData["sts"] ?? ""
-            );
-
-            if ($tradeName || $legalName || $address) {
-                $result = [
-                    "trade_name"    => $tradeName,
-                    "legal_name"    => $legalName,
-                    "address"       => $address,
-                    "state"         => $state,
-                    "pincode"       => $pincode,
-                    "city"          => $city,
-                    "business_type" => $businessType,
-                    "status"        => $status,
-                    "nature"        => $nature,
-                ];
-            }
+        if (!empty($d) && is_array($d) && !isset($d["errorMsg"])) {
+            $result = parseGstPortalData($d, $stateName);
         }
     }
 } catch (Throwable $e) {
-    // Fall through to fallback
+    // Fall through to secondary
+}
+
+// ── Secondary fallback: AppyFlow free GST API ──────────────────
+if (!$result) {
+    try {
+        $ch = curl_init("https://appyflow.in/api/verifyGST?gstNo=" . urlencode($gstin) . "&key_secret=free");
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTPGET        => true,
+            CURLOPT_HTTPHEADER     => [
+                "Accept: application/json",
+            ],
+            CURLOPT_USERAGENT      => $ua,
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+        $response = curl_exec($ch);
+        $curlErr  = curl_error($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($response !== false && !$curlErr && $httpCode === 200 && $response) {
+            $d = json_decode($response, true);
+            if (!empty($d) && is_array($d) && !isset($d["errorMsg"])) {
+                $result = parseGstPortalData($d, $stateName);
+            }
+        }
+    } catch (Throwable $e) {
+        // Fall through to last-resort fallback
+    }
 }
 
 // Return whatever we have
