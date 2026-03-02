@@ -14,8 +14,6 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
 
 function respond($d) { ob_end_clean(); echo json_encode($d); exit; }
 
-session_start();
-
 // Generate a unique token for this captcha request
 $token = bin2hex(random_bytes(16));
 
@@ -42,9 +40,11 @@ $initCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($initBody === false || $initErr) {
+    @unlink($cookieJar);
     respond(["success" => false, "error" => "Could not reach GST portal: " . ($initErr ?: "connection failed")]);
 }
 if ($initCode < 200 || $initCode >= 400) {
+    @unlink($cookieJar);
     respond(["success" => false, "error" => "GST portal returned HTTP $initCode"]);
 }
 
@@ -70,25 +70,27 @@ $captchaCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($captchaRaw === false || $captchaErr) {
+    @unlink($cookieJar);
     respond(["success" => false, "error" => "Captcha fetch failed: " . ($captchaErr ?: "connection failed")]);
 }
 if ($captchaCode !== 200 || !$captchaRaw) {
+    @unlink($cookieJar);
     respond(["success" => false, "error" => "Captcha returned HTTP $captchaCode"]);
 }
 
-// Store the cookie jar path in the session for the lookup step (fallback)
-$_SESSION['gst_cookie_jar'] = $cookieJar;
-
-// Also store the raw cookies in session as a backup in case temp file is deleted
+// Read cookie jar contents and encode for stateless transfer
 $cookieData = @file_get_contents($cookieJar);
-if ($cookieData) {
-    $_SESSION['gst_cookies_data'] = $cookieData;
-    $_SESSION['gst_cookies_token'] = $token;
+@unlink($cookieJar);
+
+if (!$cookieData) {
+    respond(["success" => false, "error" => "Could not read session cookies"]);
 }
 
+// Return captcha image + encoded cookie data so the lookup step is stateless
 respond([
-    "success" => true,
-    "captcha" => "data:image/png;base64," . base64_encode($captchaRaw),
-    "token"   => $token,
+    "success"      => true,
+    "captcha"      => "data:image/png;base64," . base64_encode($captchaRaw),
+    "token"        => $token,
+    "session_data" => base64_encode($cookieData),
 ]);
 ?>

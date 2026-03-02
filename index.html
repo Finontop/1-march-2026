@@ -3466,6 +3466,7 @@ async function modalFetchGST() {
     document.getElementById('modalGSTCaptchaInput').value = '';
     document.getElementById('modalGSTCaptchaSection').style.display = 'block';
     window._modalGstCaptchaToken = data.token || '';
+    window._modalGstSessionData = data.session_data || '';
     status.textContent = '';
     status.className = 'gst-modal-status';
     setTimeout(() => document.getElementById('modalGSTCaptchaInput').focus(), 50);
@@ -3486,7 +3487,7 @@ async function modalLoadGSTCaptcha() {
   try {
     const res  = await fetch(`${API}/gst-captcha.php`);
     const data = await res.json();
-    if (data.success) { img.src = data.captcha; window._modalGstCaptchaToken = data.token || ''; document.getElementById('modalGSTCaptchaInput').value = ''; }
+    if (data.success) { img.src = data.captcha; window._modalGstCaptchaToken = data.token || ''; window._modalGstSessionData = data.session_data || ''; document.getElementById('modalGSTCaptchaInput').value = ''; }
   } finally {
     img.style.opacity = '1';
   }
@@ -3505,7 +3506,16 @@ async function modalVerifyGSTCaptcha() {
   status.textContent = 'Fetching GST details…';
 
   try {
-    const res = await fetch(`${API}/gst-lookup.php?gstin=${encodeURIComponent(gstin)}&captcha=${encodeURIComponent(captcha)}&token=${encodeURIComponent(window._modalGstCaptchaToken || '')}`);
+    const res = await fetch(`${API}/gst-lookup.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        gstin: gstin,
+        captcha: captcha,
+        token: window._modalGstCaptchaToken || '',
+        session_data: window._modalGstSessionData || ''
+      })
+    });
     const data = await res.json();
 
     if (!data.success) {

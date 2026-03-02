@@ -5,7 +5,7 @@ error_reporting(0);
 
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
@@ -14,11 +14,13 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
 
 function respond($d) { ob_end_clean(); echo json_encode($d); exit; }
 
-session_start();
+// Accept POST with JSON body (stateless cookie transfer)
+$input = json_decode(file_get_contents("php://input"), true);
 
-$gstin   = trim($_GET["gstin"]   ?? "");
-$captcha = trim($_GET["captcha"] ?? "");
-$token   = trim($_GET["token"]   ?? "");
+$gstin        = trim($input["gstin"]        ?? $_GET["gstin"]   ?? "");
+$captcha      = trim($input["captcha"]      ?? $_GET["captcha"] ?? "");
+$token        = trim($input["token"]        ?? $_GET["token"]   ?? "");
+$sessionData  = trim($input["session_data"] ?? "");
 
 // Validate GSTIN format: 15-char alphanumeric
 if (!$gstin || !preg_match('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/', $gstin)) {
@@ -49,24 +51,22 @@ $result = null;
 
 // ── Primary: Official GST Portal API with captcha session ──────
 if ($captcha !== '') {
-    // Try token-based cookie jar first, fall back to session
+    // Restore cookie jar from session_data sent by the frontend (stateless approach)
     $cookieJar = '';
-    if ($token !== '' && preg_match('/^[a-f0-9]{32}$/', $token)) {
+    if ($sessionData !== '') {
+        $cookieContent = @base64_decode($sessionData, true);
+        if ($cookieContent !== false && strlen($cookieContent) > 0) {
+            $safeToken = ($token !== '' && preg_match('/^[a-f0-9]{32}$/', $token)) ? $token : bin2hex(random_bytes(16));
+            $cookieJar = sys_get_temp_dir() . '/gst_captcha_' . $safeToken . '.txt';
+            @file_put_contents($cookieJar, $cookieContent);
+        }
+    }
+
+    // Fallback: try token-based temp file (in case it still exists)
+    if (!$cookieJar && $token !== '' && preg_match('/^[a-f0-9]{32}$/', $token)) {
         $tokenJar = sys_get_temp_dir() . '/gst_captcha_' . $token . '.txt';
         if (file_exists($tokenJar)) {
             $cookieJar = $tokenJar;
-        }
-    }
-    if (!$cookieJar) {
-        $cookieJar = $_SESSION['gst_cookie_jar'] ?? '';
-    }
-
-    // If temp file cookie jar is gone, try restoring from session backup
-    if ($cookieJar && !file_exists($cookieJar)) {
-        $backupData  = $_SESSION['gst_cookies_data']  ?? '';
-        $backupToken = $_SESSION['gst_cookies_token']  ?? '';
-        if ($backupData && $backupToken === $token) {
-            @file_put_contents($cookieJar, $backupData);
         }
     }
 
@@ -97,9 +97,7 @@ if ($captcha !== '') {
             curl_close($ch);
 
             if ($response === false || $curlErr) {
-                // Clean up and report the curl error
                 @unlink($cookieJar);
-                unset($_SESSION['gst_cookie_jar'], $_SESSION['gst_cookies_data'], $_SESSION['gst_cookies_token']);
                 respond(["success" => false, "error" => "GST portal request failed: " . ($curlErr ?: "connection error")]);
             }
 
@@ -136,18 +134,14 @@ if ($captcha !== '') {
                         "nature"        => $d["ntr"]      ?? $d["pradr"]["ntr"] ?? "",
                     ];
                 } elseif (!empty($d["errorCode"]) || !empty($d["message"])) {
-                    // Wrong captcha or GSTIN not found — clean up and return error for UI retry
                     @unlink($cookieJar);
-                    unset($_SESSION['gst_cookie_jar'], $_SESSION['gst_cookies_data'], $_SESSION['gst_cookies_token']);
                     respond(["success" => false, "error" => $d["message"] ?? "Captcha incorrect or GSTIN not found"]);
                 } elseif (!empty($d["error"])) {
                     @unlink($cookieJar);
-                    unset($_SESSION['gst_cookie_jar'], $_SESSION['gst_cookies_data'], $_SESSION['gst_cookies_token']);
                     respond(["success" => false, "error" => $d["error"]]);
                 }
             } elseif ($httpCode >= 400) {
                 @unlink($cookieJar);
-                unset($_SESSION['gst_cookie_jar'], $_SESSION['gst_cookies_data'], $_SESSION['gst_cookies_token']);
                 respond(["success" => false, "error" => "GST portal returned HTTP $httpCode"]);
             }
         } catch (Throwable $e) {
@@ -155,9 +149,8 @@ if ($captcha !== '') {
         }
         // Clean up cookie jar
         @unlink($cookieJar);
-        unset($_SESSION['gst_cookie_jar'], $_SESSION['gst_cookies_data'], $_SESSION['gst_cookies_token']);
     } else {
-        // Cookie jar file was missing — captcha session expired
+        // No cookie data available — captcha session expired
         respond(["success" => false, "error" => "Captcha session expired. Please refresh the captcha and try again."]);
     }
 }

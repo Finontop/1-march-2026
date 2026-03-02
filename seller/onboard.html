@@ -1152,6 +1152,7 @@ async function fetchGSTDetails() {
     document.getElementById('gstCaptchaInput').value = '';
     document.getElementById('gstCaptchaSection').style.display = 'block';
     window._gstCaptchaToken = data.token || '';
+    window._gstSessionData = data.session_data || '';
     status.style.display = 'none';
     setTimeout(() => document.getElementById('gstCaptchaInput').focus(), 50);
   } catch (err) {
@@ -1176,7 +1177,7 @@ async function loadGSTCaptcha() {
   img.style.opacity = '0.5';
   try {
     const result = await safeGSTFetch(`${API}gst-captcha.php`);
-    if (result.ok) { img.src = result.data.captcha; window._gstCaptchaToken = result.data.token || ''; document.getElementById('gstCaptchaInput').value = ''; }
+    if (result.ok) { img.src = result.data.captcha; window._gstCaptchaToken = result.data.token || ''; window._gstSessionData = result.data.session_data || ''; document.getElementById('gstCaptchaInput').value = ''; }
   } finally {
     img.style.opacity = '1';
   }
@@ -1198,7 +1199,16 @@ async function verifyGSTCaptcha() {
   status.style.display = 'flex';
 
   try {
-    const result = await safeGSTFetch(`${API}gst-lookup.php?gstin=${encodeURIComponent(gstin)}&captcha=${encodeURIComponent(captcha)}&token=${encodeURIComponent(window._gstCaptchaToken || '')}`);
+    const result = await safeGSTFetch(`${API}gst-lookup.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        gstin: gstin,
+        captcha: captcha,
+        token: window._gstCaptchaToken || '',
+        session_data: window._gstSessionData || ''
+      })
+    });
 
     if (!result.ok) {
       // Wrong captcha or lookup error — allow retry
